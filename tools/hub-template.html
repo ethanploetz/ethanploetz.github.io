@@ -486,6 +486,17 @@ textarea{min-height:76px;resize:vertical}
 .resms .dot{width:22px;height:22px;flex:none;display:grid;place-items:center}.resms .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:#2F6B9A}
 .reslog{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.reslog p{margin:2px 0 0;white-space:pre-wrap}
 .reslinkf{display:grid;grid-template-columns:1fr 1.3fr auto;gap:8px;margin-top:8px}@media (max-width:600px){.reslinkf{grid-template-columns:1fr}}
+.hbanner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;border-radius:14px;background:color-mix(in oklab,#0E9F9A 12%,var(--surface));border:1px solid color-mix(in oklab,#0E9F9A 35%,transparent)}
+.hrings{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+@media (max-width:600px){.hrings{grid-template-columns:repeat(2,minmax(0,1fr))}.hrings .hring:last-child{grid-column:1/-1}}
+.hring{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px}
+.hring .rv{font-size:1.5rem}.hl{font:800 .74rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hleg{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;font-weight:600;margin-bottom:8px}.hleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hempty{position:relative;min-height:170px;display:grid;place-items:center;text-align:center;border-radius:12px;background:repeating-linear-gradient(135deg,var(--sunk) 0 10px,transparent 10px 20px);overflow:hidden}
+.hempty p{position:relative;margin:0;max-width:34ch;padding:10px 14px;border-radius:10px;background:var(--surface);color:var(--muted);font-weight:600;font-size:.88rem}
+.himin{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:6px 4px}.himin .rv{font-size:2rem}.himin b{display:block;font:900 2.2rem/1 var(--display)}.himin span{color:var(--muted);font-weight:600}
+.hwide .chart{max-height:340px}
+.hins{margin:10px 0 0;padding:10px 14px;border-radius:10px;background:var(--sunk);font-weight:600;font-size:.92rem}
 .homebar{display:flex;justify-content:flex-end;margin-bottom:-10px}
 .villbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 18px 0 14px;border-radius:99px;font:800 .95rem var(--body);color:var(--on-sun);background:linear-gradient(120deg,var(--sun1),var(--sun2) 60%,var(--sun3));box-shadow:0 6px 18px color-mix(in oklab,var(--sun2) 35%,transparent);transition:transform .15s ease,box-shadow .15s ease}
 .villbtn:hover{transform:translateY(-1px);box-shadow:0 10px 24px color-mix(in oklab,var(--sun2) 45%,transparent)}
@@ -628,6 +639,7 @@ const monday=d=>{const x=new Date(d);x.setHours(0,0,0,0);const k=(x.getDay()+6)%
 const when=n=>n===0?"Today":n===1?"Tomorrow":n<0?`${-n}d ago`:`in ${n}d`;
 const use=n=>{try{return window.claude&&window.claude.use?window.claude.use(n).catch(()=>null):Promise.resolve(null)}catch(e){return Promise.resolve(null)}};
 const ICON={
+ heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9-9.2C1.8 7.6 4 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.2 0 5.4 3.1 4.2 6.3C19 15.6 12 20 12 20z"/><path d="M3.5 12h4l2-3 3 6 2-3h6"/></svg>',
  run:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="4.5" r="2"/><path d="M9 21l2.5-5 2.5 2v3"/><path d="M6 12l3-3 4 1 2.5 3.5 3 1"/><path d="M9 9l2.5 7"/></svg>',
  film:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>',
  plane:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5l19-8-5.5 15-3.5-5.5z"/><path d="M12.5 15l9-9.5"/></svg>',
@@ -648,8 +660,8 @@ const ICON={
 };
 const HYPE=["Lock in. Every rep, every problem set, every point counts.","Outside hitters don't wait for the perfect set. Go get it.","Discipline today, branch choice tomorrow. Stack the wins.","Small gains, big season. Let's work.","The Corps is watching. So is the scoreboard. Bring it.","Be the captain before anyone hands you the armband.","Optimize everything: sleep, study, swings.","Strong body, sharp mind, loud bench. Let's go.","Make today a highlight reel.","Pressure is a privilege. Attack it."];
 /* ---------- state ---------- */
-const DOCS=["calendar","school","vb","fit","about","home","daily","resume","trips","week","plan","projects","movies"];
-const EMPTY={calendar:{events:[]},school:{courses:[],grades:{}},vb:{tournaments:[],notes:[]},fit:{goals:[],prs:[]},about:{places:[],travel:[],photos:[],goals:[]},home:{countdowns:[]},daily:{editions:[]},trips:{trips:[]},week:{weeks:[]},plan:{terms:[]},projects:{projects:[]},movies:{a:{name:"Ethan",alias:"Carl"},b:{name:"Ramon",alias:"Francisco"},list:[]},resume:{name:"",headline:"",email:"",phone:"",location:"",education:[],leadership:[],training:[],awards:[],summers:[]}};
+const DOCS=["health","calendar","school","vb","fit","about","home","daily","resume","trips","week","plan","projects","movies"];
+const EMPTY={health:{days:[],syncedAt:null,source:"garmin"},calendar:{events:[]},school:{courses:[],grades:{}},vb:{tournaments:[],notes:[]},fit:{goals:[],prs:[]},about:{places:[],travel:[],photos:[],goals:[]},home:{countdowns:[]},daily:{editions:[]},trips:{trips:[]},week:{weeks:[]},plan:{terms:[]},projects:{projects:[]},movies:{a:{name:"Ethan",alias:"Carl"},b:{name:"Ramon",alias:"Francisco"},list:[]},resume:{name:"",headline:"",email:"",phone:"",location:"",education:[],leadership:[],training:[],awards:[],summers:[]}};
 const S={db:null,uid:null,mode:"loading",docs:JSON.parse(JSON.stringify(EMPTY)),
   strava:{status:"waiting",acts:[],err:null,storedAt:null,sets:{},setsStatus:"idle"},
   mcp:null,sample:null,assets:null,
@@ -689,7 +701,7 @@ function place(e){tip.style.left=Math.min(innerWidth-130,Math.max(130,e.clientX)
 /* armed two-step deletes */
 function delBtn(key,label,fn){const armed=S.ui.armed===key;return h("button",{type:"button",class:"ghost danger",onclick:e=>{e.stopPropagation();if(armed){S.ui.armed=null;fn();}else{S.ui.armed=key;setTimeout(()=>{if(S.ui.armed===key){S.ui.armed=null;rerender()}},4000)}render()}},armed?"Confirm delete":label||"Delete")}
 /* ---------- routing ---------- */
-const ROUTES=[{id:"home",name:"Home",icon:"home",c:"var(--vb)"},{id:"daily",name:"Daily Read",icon:"news",c:"var(--school)"},{id:"school",name:"School",icon:"school",c:"var(--school)"},{id:"volleyball",name:"Volleyball",icon:"vb",c:"var(--vb)"},{id:"fitness",name:"Fitness",icon:"fit",c:"var(--fit)"},{id:"travel",name:"Travel",icon:"plane",c:"var(--about)"},{id:"projects",name:"Projects",icon:"film",c:"var(--vb)"},{id:"rush",name:"Runaway Rush",icon:"run",c:"#C2187A"},{id:"about",name:"About Me",icon:"about",c:"var(--about)"}];
+const ROUTES=[{id:"home",name:"Home",icon:"home",c:"var(--vb)"},{id:"daily",name:"Daily Read",icon:"news",c:"var(--school)"},{id:"school",name:"School",icon:"school",c:"var(--school)"},{id:"volleyball",name:"Volleyball",icon:"vb",c:"var(--vb)"},{id:"fitness",name:"Fitness",icon:"fit",c:"var(--fit)"},{id:"health",name:"Health",icon:"heart",c:"#0E9F9A"},{id:"travel",name:"Travel",icon:"plane",c:"var(--about)"},{id:"projects",name:"Projects",icon:"film",c:"var(--vb)"},{id:"rush",name:"Runaway Rush",icon:"run",c:"#C2187A"},{id:"about",name:"About Me",icon:"about",c:"var(--about)"}];
 function go(r){S.route=r;S.ui.armed=null;try{history.replaceState(null,"","#"+r)}catch(e){}try{localStorage.setItem("hub:route",r)}catch(e){}render();scrollTo(0,0)}
 let pendingRender=false;
 function rerender(){const a=document.activeElement;if(a&&$("#view").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)){pendingRender=true;return}render()}
@@ -699,12 +711,12 @@ function render(){setTimeout(roPass,0);renderNav();const v=$("#view");v.replaceC
   if(S.mode==="loading"){v.append(h("div",{class:"skel"}),h("div",{class:"skel"}));return}
   if(S.mode==="local")v.append(h("div",{class:"banner"},"Open this page in Claude while signed in to load your saved data. Changes here stay on this device."));
   if(S.mode==="snapshot")v.append(h("div",{class:"banner"},`Read-only copy, updated ${fmtD(SNAP.builtAt.slice(0,10))} at ${SNAP.builtAt.slice(11,16)}. Make changes in your Claude hub.`));
-  ({home:viewHome,daily:viewDaily,school:viewSchool,volleyball:viewVB,fitness:viewFit,travel:viewTravel,projects:viewProjects,rush:viewRush,about:viewAbout})[S.route](v);afterRender(v)}
+  ({home:viewHome,daily:viewDaily,school:viewSchool,volleyball:viewVB,fitness:viewFit,travel:viewTravel,projects:viewProjects,rush:viewRush,health:viewHealth,about:viewAbout})[S.route](v);afterRender(v)}
 function renderNav(){
   const n=$("#nav");n.replaceChildren();
   const ev=S.docs.calendar.events,soon=ev.filter(e=>isTask(e)&&!e.done&&until(e.date)>=0&&until(e.date)<=7).length;
   const nt=nextTour(),fx=fitStats();
-  const meta={home:"",rush:"2 runners",daily:dailyMeta(),travel:travelMeta(),projects:(S.docs.projects.projects||[]).length?`${S.docs.projects.projects.length}`:"",school:soon?`${soon} this week`:"",volleyball:nt?(until(nt.start)<=0?"Game day":`${until(nt.start)}d`):"",fitness:fx?`${fx.weekStreak}wk streak`:"",about:S.docs.about.places.length?`${S.docs.about.places.length} homes`:""};
+  const meta={home:"",health:(S.docs.health&&S.docs.health.days&&S.docs.health.days.length)?"Garmin":"Soon",rush:"2 runners",daily:dailyMeta(),travel:travelMeta(),projects:(S.docs.projects.projects||[]).length?`${S.docs.projects.projects.length}`:"",school:soon?`${soon} this week`:"",volleyball:nt?(until(nt.start)<=0?"Game day":`${until(nt.start)}d`):"",fitness:fx?`${fx.weekStreak}wk streak`:"",about:S.docs.about.places.length?`${S.docs.about.places.length} homes`:""};
   for(const r of ROUTES)n.append(h("button",{type:"button","aria-current":S.route===r.id?"page":null,onclick:()=>go(r.id)},h("span",{class:"lbl",html:ICON[r.icon]+`<span>${r.name}</span>`}),h("span",{class:"meta"},meta[r.id])));
   const d=until(iso(GRAD));
   const si=paintSeason()||{};
@@ -1606,6 +1618,115 @@ function viewResearch(v,p){
   lk.append(lf);lg.append(lk);g2.append(lg);
   v.append(g2);
 }
+
+/* ---------- HEALTH (Garmin) ----------
+ Data contract for the Garmin sync (doc "health"):
+ { source:"garmin", syncedAt:ISO, stepGoal:10000, days:[{ date:"YYYY-MM-DD",
+   sleep:{total,deep,light,rem,awake (minutes), score, bed:"23:40", wake:"06:10"},
+   rhr, hrv, hrvLo, hrvHi (baseline band), bbHi, bbLo, bbNow, stress (0-100 avg), steps, intensity (min),
+   readiness (0-100), vo2, acute, chronic (training load), spo2, resp, weight (lb), calories } ] } */
+const HC={teal:"#0E9F9A",deep:"#3B4CCA",light:"#7C8CF2",rem:"#B67CF2",awake:"#F2A65A",rhr:"#E5484D",hrv:"#0E9F9A",bb:"#2F80ED",steps:"#F59E0B",load:"#A855F7"};
+function healthSample(){const out=[];let seed=11;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};const t=t0();
+  for(let i=41;i>=0;i--){const d=new Date(t);d.setDate(d.getDate()-i);const wk=d.getDay()===0||d.getDay()===6;const tot=Math.round((wk?470:400)+rnd()*90-30);const deep=Math.round(tot*(.14+rnd()*.06)),rem=Math.round(tot*(.2+rnd()*.06)),awake=Math.round(10+rnd()*30);
+    const hrv=Math.round(62+rnd()*18+(tot-420)*.05);out.push({date:iso(d),sleep:{total:tot,deep,rem,awake,light:tot-deep-rem,score:Math.min(98,Math.round(55+(tot-360)*.22+rnd()*10)),bed:"23:"+String(Math.floor(rnd()*50)).padStart(2,"0"),wake:wk?"07:30":"06:05"},
+      rhr:Math.round(52+rnd()*5-(tot-420)*.01),hrv,hrvLo:58,hrvHi:76,bbHi:Math.round(70+rnd()*28),bbLo:Math.round(8+rnd()*22),stress:Math.round(22+rnd()*25+(wk?-8:4)),steps:Math.round(7000+rnd()*8000),intensity:Math.round(rnd()*60),readiness:Math.round(45+rnd()*50),vo2:+(52.5+i*-.02+rnd()*.4).toFixed(1),acute:Math.round(420+rnd()*260),chronic:Math.round(520+i*-1.5),weight:+(178.5+rnd()*2-i*.02).toFixed(1)})}
+  return {source:"sample",syncedAt:new Date().toISOString(),stepGoal:10000,days:out}}
+const hzX=(n,W,ml,mr)=>i=>ml+(n<=1?0:(W-ml-mr)*i/(n-1));
+function hzScale(vals,padF=.15,zero=false){let lo=Math.min(...vals),hi=Math.max(...vals);const p=Math.max(1,(hi-lo)*padF);lo=zero?0:Math.floor(lo-p);hi=Math.ceil(hi+p);return[lo,hi]}
+function hzAxis(lo,hi,Y,W,ml,mr,fmt=v=>v){let s="";const st=niceStep((hi-lo)/4);for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)s+=`<line class="gl" x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${ml-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`;return s}
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r||1))),m=r/p;return (m<1.5?1:m<3?2:m<7?5:10)*p}
+function hzDates(D,X,H,mb){let s="";const n=D.length,k=Math.max(1,Math.ceil(n/7));D.forEach((d,i)=>{if(i%k===0||i===n-1)s+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${fmtShort(pd(d.date))}</text>`});return s}
+function hzLine(D,keys,opt={}){const W=640,H=opt.h||220,ml=40,mr=14,mt=16,mb=24;const vals=D.flatMap(d=>keys.map(k=>d[k.key]).concat(opt.band?[d[opt.band[0]],d[opt.band[1]]]:[])).filter(v=>v!=null);if(vals.length<2)return null;
+  const [lo,hi]=hzScale(vals);const X=hzX(D.length,W,ml,mr),Y=v=>mt+(H-mt-mb)*(1-(v-lo)/(hi-lo||1));let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(lo,hi,Y,W,ml,mr);
+  if(opt.band){const up=D.map((d,i)=>d[opt.band[1]]!=null?`${X(i)},${Y(d[opt.band[1]])}`:null).filter(Boolean),dn=D.map((d,i)=>d[opt.band[0]]!=null?`${X(i)},${Y(d[opt.band[0]])}`:null).filter(Boolean).reverse();if(up.length)s+=`<polygon points="${up.join(" ")} ${dn.join(" ")}" fill="${keys[0].c}" opacity=".12"/>`}
+  for(const k of keys){const pts=D.map((d,i)=>d[k.key]!=null?[X(i),Y(d[k.key]),d]:null).filter(Boolean);if(!pts.length)continue;const p=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+","+q[1].toFixed(1)).join("");
+    if(opt.area)s+=`<path d="${p}L${pts.at(-1)[0]},${H-mb}L${pts[0][0]},${H-mb}Z" fill="${k.c}" opacity=".1"/>`;s+=`<path d="${p}" fill="none" stroke="${k.c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach((q,i)=>{s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${i===pts.length-1?5:2.6}" fill="${k.c}"/><circle cx="${q[0]}" cy="${q[1]}" r="10" fill="transparent" data-tip="${esc(fmtD(q[2].date))}: ${q[2][k.key]}${k.u||""} ${esc(k.l||"")}"/>`});
+    const L=pts.at(-1);s+=`<text class="lab" x="${L[0]-8}" y="${L[1]-10}" text-anchor="end" style="fill:${k.c}">${L[2][k.key]}${k.u||""}</text>`}
+  return s+hzDates(D,X,H,mb)+`</svg>`}
+function hzBars(D,key,opt={}){const W=640,H=opt.h||200,ml=44,mr=14,mt=14,mb=24;const vals=D.map(d=>d[key]).filter(v=>v!=null);if(!vals.length)return null;const hi=Math.max(...vals,opt.goal||0)*1.12;const bw=(W-ml-mr)/D.length;const Y=v=>mt+(H-mt-mb)*(1-v/hi);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(0,hi,Y,W,ml,mr,v=>v>=1000?(v/1000)+"k":v);
+  D.forEach((d,i)=>{const v=d[key];if(v==null)return;const hit=opt.goal&&v>=opt.goal;s+=`<rect x="${ml+i*bw+bw*.16}" y="${Y(v)}" width="${bw*.68}" height="${H-mb-Y(v)}" rx="${Math.min(6,bw*.2)}" fill="${hit?opt.c2||opt.c:opt.c}" opacity="${hit?1:.55}" data-tip="${esc(fmtD(d.date))}: ${v.toLocaleString()}${opt.u||""}"/>`});
+  if(opt.goal)s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(opt.goal)}" y2="${Y(opt.goal)}" stroke="var(--ink)" stroke-dasharray="5 5" opacity=".5"/><text x="${W-mr}" y="${Y(opt.goal)-5}" text-anchor="end">goal ${opt.goal>=1000?opt.goal/1000+"k":opt.goal}</text>`;
+  const X=i=>ml+i*bw+bw/2;return s+hzDates(D,X,H,mb)+`</svg>`}
+function hzSleep(D){const W=640,H=230,ml=40,mr=14,mt=14,mb=24;const N=D.filter(d=>d.sleep&&d.sleep.total);if(!N.length)return null;const hi=Math.max(...N.map(d=>d.sleep.total+(d.sleep.awake||0)))/60*1.1;const bw=(W-ml-mr)/D.length;const Y=v=>mt+(H-mt-mb)*(1-v/hi);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sleep stages by night">`+hzAxis(0,hi,Y,W,ml,mr,v=>v+"h");
+  D.forEach((d,i)=>{const sl=d.sleep;if(!sl||!sl.total)return;let y=H-mb;const x=ml+i*bw+bw*.16,w=bw*.68;for(const [k,c] of [["deep",HC.deep],["light",HC.light],["rem",HC.rem],["awake",HC.awake]]){const m=sl[k]||0;if(!m)continue;const hh=(H-mt-mb)*(m/60)/hi;y-=hh;s+=`<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${c}"/>`}
+    s+=`<rect x="${x}" y="${y}" width="${w}" height="${H-mb-y}" fill="transparent" rx="4" data-tip="${esc(fmtD(d.date))}: ${hm(sl.total)} asleep · deep ${hm(sl.deep)} · REM ${hm(sl.rem)}${sl.score?" · score "+sl.score:""}"/>`});
+  s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(8)}" y2="${Y(8)}" stroke="var(--ink)" stroke-dasharray="5 5" opacity=".45"/><text x="${W-mr}" y="${Y(8)-5}" text-anchor="end">8h</text>`;
+  const X=i=>ml+i*bw+bw/2;return s+hzDates(D,X,H,mb)+`</svg>`}
+function hzRange(D){const W=640,H=200,ml=40,mr=14,mt=14,mb=24;const N=D.filter(d=>d.bbHi!=null);if(!N.length)return null;const bw=(W-ml-mr)/D.length;const Y=v=>mt+(H-mt-mb)*(1-v/100);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Body Battery high and low by day"><defs><linearGradient id="bbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${HC.bb}"/><stop offset="1" stop-color="${HC.bb}" stop-opacity=".25"/></linearGradient></defs>`+hzAxis(0,100,Y,W,ml,mr);
+  D.forEach((d,i)=>{if(d.bbHi==null)return;const x=ml+i*bw+bw*.3,w=bw*.4;s+=`<rect x="${x}" y="${Y(d.bbHi)}" width="${w}" height="${Y(d.bbLo||0)-Y(d.bbHi)}" rx="${w/2}" fill="url(#bbg)" data-tip="${esc(fmtD(d.date))}: charged to ${d.bbHi}, drained to ${d.bbLo}"/>`});
+  const X=i=>ml+i*bw+bw/2;return s+hzDates(D,X,H,mb)+`</svg>`}
+function hzScatter(P,xl,yl){if(P.length<5)return null;const W=640,H=240,ml=44,mr=14,mt=14,mb=34;const xs=P.map(p=>p.x),ys=P.map(p=>p.y);const [x0,x1]=hzScale(xs,.08),[y0,y1]=hzScale(ys,.12);const X=v=>ml+(W-ml-mr)*(v-x0)/(x1-x0||1),Y=v=>mt+(H-mt-mb)*(1-(v-y0)/(y1-y0||1));
+  const n=P.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;let sxy=0,sxx=0,syy=0;P.forEach(p=>{sxy+=(p.x-mx)*(p.y-my);sxx+=(p.x-mx)**2;syy+=(p.y-my)**2});const b=sxy/(sxx||1),a=my-b*mx,r=sxy/Math.sqrt((sxx*syy)||1);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(xl)} versus ${esc(yl)}">`+hzAxis(y0,y1,Y,W,ml,mr);
+  const st=niceStep((x1-x0)/5);for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st)s+=`<text x="${X(v)}" y="${H-16}" text-anchor="middle">${+v.toFixed(1)}</text>`;
+  s+=`<text x="${(W+ml)/2}" y="${H-1}" text-anchor="middle">${esc(xl)}</text>`;
+  s+=`<line x1="${X(x0)}" y1="${Y(a+b*x0)}" x2="${X(x1)}" y2="${Y(a+b*x1)}" stroke="${HC.teal}" stroke-width="2.5" stroke-dasharray="6 5"/>`;
+  P.forEach(p=>s+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="5.5" fill="${HC.teal}" opacity=".7" data-tip="${esc(p.tip||"")}"/>`);
+  return {svg:s+`</svg>`,r,b}}
+const hm=m=>m==null?"—":`${Math.floor(m/60)}h ${String(Math.round(m%60)).padStart(2,"0")}m`;
+const hAvg=a=>{a=a.filter(v=>v!=null);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+function hCard(title,sub,chart,emptyMsg,extra,wide){return h("section",{class:"card hcard"+(wide?" hwide":""),style:`--c:${HC.teal}`},h("div",{class:"card-h"},h("h2",null,title),sub?h("span",{class:"muted",style:"font-size:.85rem"},sub):null),extra||null,
+  chart?h("div",{html:chart}):h("div",{class:"hempty"},h("div",{class:"hgh"}),h("p",null,emptyMsg||"Fills in once Garmin syncs.")))}
+function viewHealth(v){
+  const real=S.docs.health&&S.docs.health.days&&S.docs.health.days.length;const sample=!real&&S.ui.hsample;
+  const H=real?S.docs.health:sample?healthSample():{days:[],stepGoal:10000};
+  const D=(H.days||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));const last=D.at(-1)||{};const d14=D.slice(-14),d30=D.slice(-30);
+  v.append(h("header",null,h("div",{class:"eyebrow",style:`--c:${HC.teal}`},real?`Garmin · synced ${H.syncedAt?fmtD(H.syncedAt.slice(0,10))+" "+H.syncedAt.slice(11,16):""}`:"Garmin · getting connected"),h("h1",null,"Health"),
+    h("p",{class:"sub"},"Sleep, heart, recovery, stress and activity from your Garmin, all in one place, with the trends that matter.")));
+  if(!real)v.append(h("div",{class:"hbanner"},h("div",null,h("b",null,sample?"You're looking at sample data.":"Waiting for your Garmin data."),h("span",null,sample?" None of these numbers are yours. They show what each chart will look like.":" Once Garmin is connected, every chart here fills in by itself.")),
+    h("button",{type:"button",class:"btn",style:`--c:${HC.teal}`,"aria-pressed":String(!!sample),onclick:()=>{S.ui.hsample=!S.ui.hsample;render()}},sample?"Hide sample data":"Preview with sample data")));
+  /* today rings */
+  const sg=H.stepGoal||10000;const sc=last.sleep&&last.sleep.score;
+  const rings=[[sc,100,"Sleep score",sc!=null?String(sc):"—",HC.deep],[last.bbNow??last.bbHi,100,"Body Battery",(last.bbNow??last.bbHi)!=null?String(last.bbNow??last.bbHi):"—",HC.bb],[last.readiness,100,"Readiness",last.readiness!=null?String(last.readiness):"—",HC.teal],[last.stress!=null?100-last.stress:null,100,"Stress (avg)",last.stress!=null?String(last.stress):"—",last.stress>50?HC.rhr:HC.awake],[last.steps,sg,"Steps",last.steps!=null?(last.steps>=1000?(last.steps/1000).toFixed(1)+"k":String(last.steps)):"—",HC.steps]];
+  const rr=h("section",{class:"hrings"});for(const [val,max,l,txt,c] of rings)rr.append(h("div",{class:"card hring",style:`--c:${c}`},h("div",{html:ringSVG(val!=null?val/max:0,c,96,txt,"")}).firstChild,h("div",{class:"hl"},l)));
+  v.append(rr);
+  const s7=D.slice(-7);const vitals=[["Resting HR",last.rhr,"bpm",hAvg(s7.map(d=>d.rhr)),true],["HRV (overnight)",last.hrv,"ms",hAvg(s7.map(d=>d.hrv)),false],["VO2 max",last.vo2,"",null,false],["Sleep, 7-day avg",hAvg(s7.map(d=>d.sleep&&d.sleep.total)),"",null,false]];
+  const vg=h("section",{class:"grid g4"});for(const [l,val,u,avg,lowGood] of vitals){const isSleep=l.startsWith("Sleep");const dlt=avg!=null&&val!=null?val-avg:null;
+    vg.append(h("div",{class:"stat",style:`--c:${HC.teal}`},h("div",{class:"v"},val==null?"—":isSleep?hm(val):String(Math.round(val*10)/10)+(u?` ${u}`:"")),h("div",{class:"k"},l+(dlt!=null&&Math.abs(dlt)>=.5?` · ${dlt>0?"▲":"▼"} ${Math.abs(dlt).toFixed(0)} vs 7-day`:""))))}
+  v.append(vg);
+  /* sleep */
+  const sl14=d14.filter(d=>d.sleep);const avgS=hAvg(sl14.map(d=>d.sleep.total)),avgScore=hAvg(sl14.map(d=>d.sleep.score));
+  v.append(h("div",{class:"split"},
+    hCard("Sleep","Last 14 nights",hzSleep(d14),"Your sleep stages for each night show up here.",sl14.length?h("div",{class:"hleg"},...[["Deep",HC.deep],["Light",HC.light],["REM",HC.rem],["Awake",HC.awake]].map(([n,c])=>h("span",null,h("i",{style:`background:${c}`}),n)),h("span",{class:"muted"},`avg ${hm(avgS)}${avgScore?` · score ${Math.round(avgScore)}`:""}`)):null),
+    hCard("Sleep score","Last 30 nights",hzLine(d30.map(d=>({date:d.date,score:d.sleep&&d.sleep.score})),[{key:"score",c:HC.deep,l:"sleep score"}],{area:true,label:"Sleep score"}),"Nightly sleep score trend.")));
+  /* heart */
+  v.append(h("div",{class:"split"},
+    hCard("Resting heart rate","Last 30 days · lower is better",hzLine(d30,[{key:"rhr",c:HC.rhr,u:" bpm",l:"resting HR"}],{label:"Resting heart rate"}),"Resting heart rate trend."),
+    hCard("HRV","Overnight average · shaded band is your normal range",hzLine(d30,[{key:"hrv",c:HC.hrv,u:" ms",l:"HRV"}],{band:["hrvLo","hrvHi"],label:"Heart rate variability"}),"Overnight HRV against your baseline.")));
+  /* recovery + stress */
+  v.append(h("div",{class:"split"},
+    hCard("Body Battery","Daily charge and drain, last 14 days",hzRange(d14),"How high you charged and how low you drained each day."),
+    hCard("Stress","Daily average, last 12 weeks",stressCal(D),"A calendar of your daily stress levels.")));
+  /* activity */
+  const wk=D.filter(d=>dayDiff(monday(t0()),pd(d.date))>=0);const im=wk.reduce((a,d)=>a+(d.intensity||0),0);
+  v.append(h("div",{class:"split"},
+    hCard("Steps","Last 14 days",hzBars(d14,"steps",{c:HC.steps,c2:HC.steps,goal:sg,label:"Daily steps"}),"Daily steps against your goal."),
+    hCard("Intensity minutes","This week vs. the 150-minute goal",D.length?`<div class="himin">${ringSVG(im/150,HC.load,150,String(im),"of 150 min")}<div><b>${im>=150?im-150:150-im}</b><span>${im>=150?"minutes over. Goal hit.":"minutes to go this week"}</span></div></div>`:null,"Weekly intensity minutes.")));
+  /* training */
+  const eff=stravaEffortWeeks();
+  v.append(h("div",{class:"split"},
+    hCard("Training effort","Weekly Strava relative effort · live now",eff,"Your Strava workouts show up here."),
+    hCard("Training load","Acute (7-day) vs. chronic (28-day)",hzLine(d30,[{key:"acute",c:HC.load,l:"acute load"},{key:"chronic",c:"var(--muted)",l:"chronic load"}],{label:"Training load"}),"Short-term vs. long-term training load from Garmin.")));
+  v.append(h("div",{class:"split"},
+    hCard("VO2 max","Running fitness estimate",hzLine(D.filter(d=>d.vo2!=null),[{key:"vo2",c:HC.teal,l:"VO2 max"}],{area:true,label:"VO2 max"}),"VO2 max trend from your runs."),
+    hCard("Weight","Trend",hzLine(D.filter(d=>d.weight!=null),[{key:"weight",c:"var(--about)",u:" lb",l:"weight"}],{label:"Weight"}),"Weight trend, if you log it in Garmin.")));
+  /* insight */
+  const P=[];for(let i=1;i<D.length;i++){const a=D[i-1],b=D[i];if(a.sleep&&a.sleep.total&&b.hrv!=null)P.push({x:+(a.sleep.total/60).toFixed(2),y:b.hrv,tip:`${fmtD(a.date)}: ${hm(a.sleep.total)} sleep → ${b.hrv} ms HRV next morning`})}
+  const sc2=hzScatter(P,"Hours slept","Next-morning HRV");
+  v.append(hCard("Does sleep move your HRV?",sc2?`${P.length} nights · r = ${sc2.r.toFixed(2)}`:"Correlation, built for an OR major",sc2?sc2.svg:null,"Once a couple of weeks of data is in, this plots every night's sleep against the next morning's HRV and fits a trend line.",
+    sc2?h("p",{class:"hins"},Math.abs(sc2.r)<.2?"No real relationship yet. Sleep length isn't what's driving your HRV right now.":`${sc2.r>0?"More sleep, higher HRV":"More sleep, lower HRV"}: each extra hour lines up with about ${Math.abs(sc2.b).toFixed(1)} ms ${sc2.b>0?"more":"less"} HRV the next morning (r = ${sc2.r.toFixed(2)}, ${Math.abs(sc2.r)>=.5?"a strong":Math.abs(sc2.r)>=.3?"a moderate":"a weak"} link). Correlation, not proof.`):null,true));
+}
+function stressCal(D){const M={};for(const d of D)if(d.stress!=null)M[d.date]=d.stress;if(!Object.keys(M).length)return null;const weeks=12,cs=17,g=4,ml=28,mt=18;const start=monday(t0());start.setDate(start.getDate()-7*(weeks-1));const W=ml+weeks*(cs+g),H=mt+7*(cs+g);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily stress, last 12 weeks">`;["Mon","","Wed","","Fri","",""].forEach((l,i)=>{if(l)s+=`<text x="0" y="${mt+i*(cs+g)+cs-3}">${l}</text>`});let lm=-1;
+  for(let w=0;w<weeks;w++){const d0=new Date(start);d0.setDate(d0.getDate()+7*w);if(d0.getMonth()!==lm){lm=d0.getMonth();s+=`<text x="${ml+w*(cs+g)}" y="11">${MON[lm]}</text>`}
+    for(let i=0;i<7;i++){const d=new Date(d0);d.setDate(d.getDate()+i);if(d>t0())continue;const k=iso(d),v=M[k];const c=v==null?"var(--sunk)":v<26?"#3BB273":v<51?"#F2C14E":v<76?"#F2884B":"#E5484D";s+=`<rect x="${ml+w*(cs+g)}" y="${mt+i*(cs+g)}" width="${cs}" height="${cs}" rx="4" fill="${c}" data-tip="${esc(fmtD(k))}: ${v==null?"no data":"stress "+v}"/>`}}
+  return s+`</svg><div class="hleg" style="margin-top:6px"><span><i style="background:#3BB273"></i>Rest</span><span><i style="background:#F2C14E"></i>Low</span><span><i style="background:#F2884B"></i>Medium</span><span><i style="background:#E5484D"></i>High</span></div>`}
+function stravaEffortWeeks(){const A=(S.strava&&S.strava.acts)||[];if(!A.length)return null;const weeks=12,W={};const m0=monday(t0());for(const a of A){const d=pd(a.start_local.slice(0,10));const k=iso(monday(d));W[k]=(W[k]||0)+((a.summary&&a.summary.relative_effort)||0)}
+  const D=[];for(let i=weeks-1;i>=0;i--){const d=new Date(m0);d.setDate(d.getDate()-7*i);D.push({date:iso(d),e:W[iso(d)]||0})}return hzBars(D,"e",{c:HC.load,c2:HC.load,label:"Weekly relative effort",u:" effort"})}
 function viewProjects(v){
   const P=S.docs.projects.projects||[];
   if(S.ui.project){const p=P.find(x=>x.id===S.ui.project);if(p)return p.type==="movies"?viewMovies(v,p):p.type==="research"?viewResearch(v,p):null;S.ui.project=null}
