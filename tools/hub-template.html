@@ -458,6 +458,11 @@ textarea{min-height:76px;resize:vertical}
 .frow input[type=range]{width:100%;accent-color:var(--vb)}
 .mfine{color:var(--muted);font-size:.78rem}
 @media (max-width:820px){#music{width:100%;border-left:0}.musicbtn .live{top:6px;right:8px}}
+.gcov{position:relative;overflow:hidden;background:linear-gradient(135deg,#2A1B5C,#C2187A)!important}
+.gcov .gart{position:absolute;inset:0;opacity:.55}
+.gcov .gart svg{width:100%;height:100%;display:block;object-fit:cover}
+.gcov>div:last-child{position:relative}
+.gtile{cursor:pointer}
 .rushhero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:center;padding:26px;border-radius:22px;background:linear-gradient(135deg,#0F2E1C,#1E4D33 55%,#5A1E4A);color:#FFF4E3;overflow:hidden;box-shadow:0 14px 34px rgba(30,20,40,.25)}
 .rh-k{font:800 .74rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:#FFB25A}
 .rh-t{font:900 clamp(2.2rem,5vw,3.4rem)/1 var(--display);text-transform:uppercase;letter-spacing:.01em;margin:6px 0 8px}
@@ -742,8 +747,8 @@ function place(e){tip.style.left=Math.min(innerWidth-130,Math.max(130,e.clientX)
 /* armed two-step deletes */
 function delBtn(key,label,fn){const armed=S.ui.armed===key;return h("button",{type:"button",class:"ghost danger",onclick:e=>{e.stopPropagation();if(armed){S.ui.armed=null;fn();}else{S.ui.armed=key;setTimeout(()=>{if(S.ui.armed===key){S.ui.armed=null;rerender()}},4000)}render()}},armed?"Confirm delete":label||"Delete")}
 /* ---------- routing ---------- */
-const ROUTES=[{id:"home",name:"Home",icon:"home",c:"var(--vb)"},{id:"daily",name:"Daily Read",icon:"news",c:"var(--school)"},{id:"school",name:"School",icon:"school",c:"var(--school)"},{id:"volleyball",name:"Volleyball",icon:"vb",c:"var(--vb)"},{id:"fitness",name:"Fitness",icon:"fit",c:"var(--fit)"},{id:"health",name:"Health",icon:"heart",c:"#0E9F9A"},{id:"travel",name:"Travel",icon:"plane",c:"var(--about)"},{id:"projects",name:"Projects",icon:"film",c:"var(--vb)"},{id:"rush",name:"Runaway Rush",icon:"run",c:"#C2187A"},{id:"about",name:"About Me",icon:"about",c:"var(--about)"}];
-function go(r){S.route=r;S.ui.armed=null;try{history.replaceState(null,"","#"+r)}catch(e){}try{localStorage.setItem("hub:route",r)}catch(e){}render();scrollTo(0,0)}
+const ROUTES=[{id:"home",name:"Home",icon:"home",c:"var(--vb)"},{id:"daily",name:"Daily Read",icon:"news",c:"var(--school)"},{id:"school",name:"School",icon:"school",c:"var(--school)"},{id:"volleyball",name:"Volleyball",icon:"vb",c:"var(--vb)"},{id:"fitness",name:"Fitness",icon:"fit",c:"var(--fit)"},{id:"health",name:"Health",icon:"heart",c:"#0E9F9A"},{id:"travel",name:"Travel",icon:"plane",c:"var(--about)"},{id:"projects",name:"Projects",icon:"film",c:"var(--vb)"},{id:"about",name:"About Me",icon:"about",c:"var(--about)"}];
+function go(r){if(r==="rush"){S.ui.project="rush";r="projects"}S.route=r;S.ui.armed=null;try{history.replaceState(null,"","#"+r)}catch(e){}try{localStorage.setItem("hub:route",r)}catch(e){}render();scrollTo(0,0)}
 let pendingRender=false;
 function rerender(){const a=document.activeElement;if(a&&$("#view").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)){pendingRender=true;return}render()}
 document.addEventListener("focusout",()=>setTimeout(()=>{if(pendingRender){const a=document.activeElement;if(!(a&&$("#view").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))){pendingRender=false;render()}}},50));
@@ -912,7 +917,7 @@ function heatmap(){
   let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Training days, last 26 weeks">`;
   ["Mon","","Wed","","Fri","",""].forEach((l,i)=>{if(l)s+=`<text x="0" y="${mt+i*(cs+g)+cs-3}">${l}</text>`});
   let lastM=-1;
-  for(let w=0;w<weeks;w++){const d0=new Date(start);d0.setDate(d0.getDate()+7*w);if(d0.getMonth()!==lastM){lastM=d0.getMonth();s+=`<text x="${ml+w*(cs+g)}" y="11">${MON[lastM]}</text>`}
+  for(let w=0;w<weeks;w++){const d0=new Date(start);d0.setDate(d0.getDate()+7*w);if(d0.getMonth()!==lastM){lastM=d0.getMonth();if(w>0||d0.getDate()<=8)s+=`<text x="${ml+w*(cs+g)}" y="11">${MON[lastM]}</text>`}
     for(let i=0;i<7;i++){const d=new Date(d0);d.setDate(d.getDate()+i);if(d>today)continue;const k=iso(d),m=mins[k]||0;
       const lvl=m===0?0:m<30?1:m<60?2:m<90?3:4;const fill=lvl?`color-mix(in oklab,var(--fit) ${[0,30,55,78,100][lvl]}%,var(--surface))`:"var(--sunk)";
       s+=`<rect x="${ml+w*(cs+g)}" y="${mt+i*(cs+g)}" width="${cs}" height="${cs}" rx="3" fill="${fill}" data-tip="${esc(fmtD(k))}: ${m?Math.round(m)+" min · "+esc(names[k].join(", ")):"rest day"}"/>`}}
@@ -1126,30 +1131,126 @@ function bestFor(name,unit){
   if(unit==="lb"){const ex=strengthData();for(const[n,pts]of Object.entries(ex))if(n.toLowerCase()===k)for(const p of pts)best=best==null?p.v:Math.max(best,p.v)}
   return best
 }
+/* ---------- FITNESS (Strava) ---------- */
+const FC={run:"#E4572E",lift:"#3B4CCA",walk:"#0E9F9A",other:"#F2A65A",pace:"#E4572E",cad:"#B67CF2",vol:"#3B4CCA",e1:"#E4572E",top:"#3B4CCA"};
+const fPace=s=>s==null||!isFinite(s)?"—":`${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
+const fKind=a=>{const t=a.sport_type||"";return /Run/i.test(t)?"run":/Weight|Strength|Crossfit/i.test(t)?"lift":/Walk|Hike/i.test(t)?"walk":"other"};
+const fLb=x=>{const v=parseFloat(x&&x.value);return isFinite(v)?v:0};
+function fData(){
+  const A=(S.strava.acts||[]).slice().sort((a,b)=>a.start_local.localeCompare(b.start_local));
+  const runs=A.filter(a=>fKind(a)==="run").map(a=>{const s=a.summary||{},mi=(s.distance||0)/1609.344,mt=s.moving_time||0;return{date:a.start_local.slice(0,10),name:a.name,mi:+mi.toFixed(2),mt,pace:mi>0?mt/mi:null,elev:Math.round((s.elevation_gain||0)*3.281),re:s.relative_effort??null,cal:s.total_calories??null,cad:s.avg_cadence?Math.round(s.avg_cadence*2):null,prs:s.pr_count||0}});
+  const pr=runs.filter(r=>r.mi>=1&&r.pace&&r.pace<15*60);
+  const m0=monday(t0()),W=[];
+  for(let i=25;i>=0;i--){const d=new Date(m0);d.setDate(d.getDate()-7*i);const e=new Date(d);e.setDate(e.getDate()+7);const L=A.filter(a=>{const x=pd(a.start_local);return x>=d&&x<e});
+    const mins=k=>Math.round(L.filter(a=>fKind(a)===k).reduce((s,a)=>s+((a.summary&&a.summary.moving_time)||0),0)/60);
+    const R=L.filter(a=>fKind(a)==="run"),rmi=R.reduce((s,a)=>s+(a.summary.distance||0)/1609.344,0),rmt=R.reduce((s,a)=>s+(a.summary.moving_time||0),0);
+    W.push({date:iso(d),run:mins("run"),lift:mins("lift"),walk:mins("walk"),other:mins("other"),n:L.length,runs:R.length,lifts:L.filter(a=>fKind(a)==="lift").length,
+      mi:+rmi.toFixed(1),long:+Math.max(0,...R.map(a=>(a.summary.distance||0)/1609.344)).toFixed(1),pace:rmi>0?rmt/rmi:null,
+      re:L.reduce((s,a)=>s+((a.summary&&a.summary.relative_effort)||0),0),cal:L.reduce((s,a)=>s+((a.summary&&a.summary.total_calories)||0),0),cur:i===0})}
+  /* lifting from Garmin sets */
+  const lifts=[],ex={},mg={};const d30=new Date(t0());d30.setDate(d30.getDate()-30);
+  for(const a of A){if(fKind(a)!=="lift")continue;const sets=S.strava.sets[String(a.id)];if(!sets||!sets.length)continue;let vol=0,n=0;const date=a.start_local.slice(0,10);
+    for(const s of sets){const w=fLb(s.weight),r=parseInt(s.reps&&s.reps.value)||0;if(w>0&&r>0){vol+=w*r;n++}const nm=s.exercise_name;if(!nm||/unknown/i.test(nm)||!(w>0)||!(r>0))continue;
+      const e=(ex[nm]=ex[nm]||{});const cur=(e[date]=e[date]||{date,top:0,reps:0,e1:0,vol:0,sets:0});if(w>cur.top||(w===cur.top&&r>cur.reps)){cur.top=w;cur.reps=r}if(r<=12)cur.e1=Math.max(cur.e1,Math.round(w*(1+r/30)));cur.vol+=w*r;cur.sets++;
+      if(pd(date)>=d30)for(const g of(s.muscle_groups||[]))mg[g]=(mg[g]||0)+1}
+    lifts.push({date,name:a.name,vol:Math.round(vol),sets:n,min:Math.round(((a.summary&&a.summary.moving_time)||0)/60)})}
+  for(const p of S.docs.fit.prs||[])if(p.unit==="lb"){const k=Object.keys(ex).find(n=>n.toLowerCase()===p.lift.toLowerCase())||p.lift;const e=(ex[k]=ex[k]||{});const c=(e[p.date]=e[p.date]||{date:p.date,top:0,reps:0,e1:0,vol:0,sets:0});if(p.value>=c.top){c.top=p.value;c.reps=p.reps||1;c.pr=true}c.e1=Math.max(c.e1,Math.round(p.value*(1+(p.reps||1)/30)))}
+  const EX={};for(const[k,v]of Object.entries(ex))EX[k]=Object.values(v).sort((a,b)=>a.date.localeCompare(b.date));
+  return{A,runs,pr,W,lifts,EX,mg}}
+function fzStack(D,keys,opt={}){if(!D.length)return null;const W=640,H=opt.h||230,ml=44,mr=14,mt=14,mb=24;const tot=D.map(d=>keys.reduce((s,k)=>s+(d[k.k]||0),0));const hi=Math.max(...tot,opt.goal||0,1)*1.12;const bw=(W-ml-mr)/D.length;const Y=v=>mt+(H-mt-mb)*(1-v/hi);
+  let s=`<svg class="chart" ${hzA(ml,W-ml-mr,D.length,"bar",mt,H-mb)} viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(0,hi,Y,W,ml,mr,opt.fmt);
+  D.forEach((d,i)=>{let acc=0;const x=ml+i*bw+bw*.14,w=bw*.72;for(const k of keys){const v=d[k.k]||0;if(!v)continue;s+=`<rect x="${x}" y="${Y(acc+v)}" width="${w}" height="${Y(acc)-Y(acc+v)}" fill="${k.c}" opacity="${d.cur?.6:1}"/>`;acc+=v}
+    s+=`<rect x="${ml+i*bw}" y="${mt}" width="${bw}" height="${H-mt-mb}" fill="transparent" data-tip="${esc(opt.lab?opt.lab(d):fmtShort(pd(d.date)))}: ${keys.filter(k=>d[k.k]).map(k=>`${k.l} ${opt.fmt?opt.fmt(d[k.k]):d[k.k]}`).join(" · ")||"rest"}"/>`});
+  if(opt.goal)s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(opt.goal)}" y2="${Y(opt.goal)}" stroke="var(--ink)" stroke-dasharray="5 5" opacity=".5"/><text x="${W-mr}" y="${Y(opt.goal)-5}" text-anchor="end">${esc(opt.goalLab||"")}</text>`;
+  const X=i=>ml+i*bw+bw/2;return s+hzDates(D,X,H,mb)+`</svg>`}
+function fzWhen(A){if(!A.length)return null;const rows=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],cols=[["Early","<7"],["Morning","7–11"],["Midday","11–14"],["Afternoon","14–18"],["Evening","18+"]];const C=rows.map(()=>cols.map(()=>({n:0,m:0})));
+  for(const a of A){const d=pd(a.start_local),hh=+a.start_local.slice(11,13);const r=(d.getDay()+6)%7,c=hh<7?0:hh<11?1:hh<14?2:hh<18?3:4;C[r][c].n++;C[r][c].m+=((a.summary&&a.summary.moving_time)||0)/60}
+  const mx=Math.max(1,...C.flat().map(x=>x.n));const W=480,ml=44,mt=34,cw=(W-ml-6)/cols.length,ch=30,H=mt+7*(ch+4);let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Workouts by day and time">`;
+  cols.forEach(([l,t],i)=>s+=`<text x="${ml+i*cw+cw/2}" y="13" text-anchor="middle" style="fill:var(--ink);font-weight:800">${l}</text><text x="${ml+i*cw+cw/2}" y="26" text-anchor="middle">${t}</text>`);
+  rows.forEach((r,ri)=>{const y=mt+ri*(ch+4);s+=`<text x="${ml-8}" y="${y+ch/2+4}" text-anchor="end" style="fill:var(--ink);font-weight:700">${r}</text>`;cols.forEach((c,ci)=>{const v=C[ri][ci];s+=`<rect x="${ml+ci*cw+2}" y="${y}" width="${cw-4}" height="${ch}" rx="6" fill="${v.n?"var(--fit)":"var(--sunk)"}" opacity="${v.n?(.18+.82*v.n/mx).toFixed(2):1}" data-tip="${r} ${c[0].toLowerCase()}: ${v.n} workout${v.n===1?"":"s"}${v.n?`, ${Math.round(v.m)} min`:""}"/>`+(v.n?`<text x="${ml+ci*cw+cw/2}" y="${y+ch/2+4}" text-anchor="middle" style="fill:${v.n/mx>.55?"#fff":"var(--ink)"};font-weight:800;pointer-events:none">${v.n}</text>`:"")})});
+  return s+`</svg>`}
+function fzHBars(rows,c){if(!rows.length)return null;const W=440,ml=104,mr=34,bh=24,g=8,H=rows.length*(bh+g)+4;const mx=Math.max(...rows.map(r=>r.v));let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sets per muscle group">`;
+  rows.forEach((r,i)=>{const y=i*(bh+g),w=(W-ml-mr)*r.v/mx;s+=`<text x="${ml-8}" y="${y+bh/2+4}" text-anchor="end" style="fill:var(--ink);font-weight:700">${esc(r.l)}</text><rect x="${ml}" y="${y}" width="${Math.max(3,w)}" height="${bh}" rx="6" fill="${c}" opacity="${(.4+.6*r.v/mx).toFixed(2)}" data-tip="${esc(r.l)}: ${r.v} sets in the last 30 days"/><text x="${ml+w+6}" y="${y+bh/2+4}" style="fill:var(--ink);font-weight:800">${r.v}</text>`});return s+`</svg>`}
+function fInsights(F){const out=[];const W=F.W.filter(w=>!w.cur),w8=W.slice(-8);
+  if(w8.length){const avg=w8.reduce((s,w)=>s+w.n,0)/w8.length,good=w8.filter(w=>w.n>=3).length;out.push(["📆",`You average <b>${avg.toFixed(1)} workouts a week</b> over the last 8 weeks, with ${good} of 8 weeks at 3+ sessions.${good<5?" Consistency is the biggest lever right now.":""}`])}
+  const m4=W.slice(-4).reduce((s,w)=>s+w.mi,0),p4=W.slice(-8,-4).reduce((s,w)=>s+w.mi,0);out.push(["🏃",`Running: <b>${m4.toFixed(1)} mi</b> in the last 4 weeks vs ${p4.toFixed(1)} the 4 before${m4<p4?" — mileage is <b>dropping</b>":m4>p4?" — building":""}.`]);
+  if(F.pr.length>=4){const k=Math.min(5,Math.floor(F.pr.length/2));const a=F.pr.slice(0,k),b=F.pr.slice(-k);const pa=a.reduce((s,r)=>s+r.mt,0)/a.reduce((s,r)=>s+r.mi,0),pb=b.reduce((s,r)=>s+r.mt,0)/b.reduce((s,r)=>s+r.mi,0);out.push(["⚡",`Average pace of your last ${k} runs is <b>${fPace(pb)}/mi</b> vs ${fPace(pa)}/mi for your first ${k} in this window (${pb<pa?"faster":"slower"} by ${fPace(Math.abs(pa-pb))}).`])}
+  const lr=F.runs.reduce((m,r)=>r.mi>(m?m.mi:0)?r:m,null);const days=Math.round((pd("2026-12-20")-t0())/864e5);if(lr&&days>=0)out.push(["🎯",`Longest run in 26 weeks: <b>${lr.mi.toFixed(1)} mi</b> (${esc(lr.name)}, ${fmtShort(pd(lr.date))}). Half marathon is <b>${days} days</b> out at 13.1 mi.`]);
+  const b=F.EX["Bench Press"];if(b&&b.length>=4){const hf=Math.floor(b.length/2),A1=Math.max(...b.slice(0,hf).map(x=>x.top)),A2=Math.max(...b.slice(hf).map(x=>x.top)),best=b.reduce((m,x)=>x.top>m.top?x:m);out.push(["🏋️",`Bench: best top set <b>${Math.round(best.top)} × ${best.reps}</b> (${fmtShort(pd(best.date))}), est. 1RM ≈ <b>${Math.max(...b.map(x=>x.e1))} lb</b>. Heaviest set was ${Math.round(A1)} lb in your earlier sessions and ${Math.round(A2)} lb in your recent ones.`])}
+  const mgs=Object.entries(F.mg).sort((a,b)=>b[1]-a[1]);if(mgs.length>=3){const legs=["Quadriceps","Hamstrings","Glutes"].reduce((s,k)=>s+(F.mg[k]||0),0),up=["Chest","Lats","Shoulders","Triceps","Biceps"].reduce((s,k)=>s+(F.mg[k]||0),0);out.push(["⚖️",`Last 30 days of logged sets: <b>${up}</b> upper-body vs <b>${legs}</b> leg muscle-group hits${legs*3<up?" — legs are getting a lot less work":""}.`])}
+  return out}
 function viewFit(v){
-  v.append(h("header",null,h("div",{class:"eyebrow",style:"--c:var(--fit)"},"Synced from Strava · Garmin lifts included"),h("h1",null,"Fitness"),h("p",{class:"sub"},"Runs and lifts come in from Strava on their own. Log PRs and set goals here.")));
+  v.append(h("header",null,h("div",{class:"eyebrow",style:"--c:var(--fit)"},`Strava · ${stravaLine()}`),h("h1",null,"Fitness"),h("p",{class:"sub"},"Runs, lifts and rucks from Strava and Garmin, with the trends underneath them. Click any chart to expand it.")));
   const b=stravaBanner();if(b)v.append(b);
   const fx=fitStats();const now=t0();
-  if(fx)v.append(h("section",{class:"grid g4"},
-    h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.monthMiles.toFixed(1)),h("div",{class:"k"},`miles in ${MON[now.getMonth()]} · ${fx.monthRuns} runs`)),
-    h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.monthLifts),h("div",{class:"k"},`lifts in ${MON[now.getMonth()]}`)),
-    h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.weekWorkouts),h("div",{class:"k"},"workouts this week")),
-    h("div",{class:"stat",style:"--c:var(--vb)"},h("div",{class:"v flame",html:`${ICON.flame}<span>${fx.weekStreak}</span>`}),h("div",{class:"k"},`week streak · ${fx.dayStreak}-day streak`))));
-  else if(S.strava.status==="waiting")v.append(h("div",{class:"skel",style:"height:90px"}));
-  if(S.strava.acts.length){
-    v.append(h("section",{class:"split"},
-      h("div",{class:"card"},h("div",{class:"card-h"},h("h2",null,"Weekly mileage"),h("span",{class:"muted",style:"font-size:.85rem"},"Running miles, last 12 weeks")),h("div",{html:weeklyBars()})),
-      h("div",{class:"card"},h("div",{class:"card-h"},h("h2",null,"Training calendar"),h("span",{class:"muted",style:"font-size:.85rem"},"Darker = longer session")),h("div",{style:"overflow-x:auto"},h("div",{html:heatmap(),style:"min-width:420px"})),
-        h("div",{class:"legend"},h("span",null,"Rest"),...[30,55,78,100].map(p=>h("span",{style:`display:inline-block;width:13px;height:13px;border-radius:3px;background:color-mix(in oklab,var(--fit) ${p}%,var(--surface))`})),h("span",null,"90+ min")))));
+  if(!S.strava.acts.length&&S.strava.status==="waiting"){v.append(h("div",{class:"skel",style:"height:90px"}))}
+  const F=fData();
+  if(fx){const r30=F.pr.filter(r=>dayDiff(pd(r.date),now)<=30);const p30=r30.length?r30.reduce((s,r)=>s+r.mt,0)/r30.reduce((s,r)=>s+r.mi,0):null;const mMin=Math.round(F.A.filter(a=>pd(a.start_local)>=new Date(now.getFullYear(),now.getMonth(),1)).reduce((s,a)=>s+((a.summary&&a.summary.moving_time)||0),0)/60);const re4=F.W.filter(w=>!w.cur).slice(-4).reduce((s,w)=>s+w.re,0)/4;
+    v.append(h("section",{class:"grid g4"},
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.monthMiles.toFixed(1)),h("div",{class:"k"},`miles in ${MON[now.getMonth()]} · ${fx.monthRuns} runs`)),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.monthLifts),h("div",{class:"k"},`lifts in ${MON[now.getMonth()]}`)),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},fx.weekWorkouts),h("div",{class:"k"},"workouts this week")),
+      h("div",{class:"stat",style:"--c:var(--vb)"},h("div",{class:"v flame",html:`${ICON.flame}<span>${fx.weekStreak}</span>`}),h("div",{class:"k"},`week streak · ${fx.dayStreak}-day streak`)),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},p30?fPace(p30):"—"),h("div",{class:"k"},`avg run pace /mi · last 30 days${r30.length?` · ${r30.length} run${r30.length>1?"s":""}`:""}`)),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},`${Math.floor(mMin/60)}h ${String(mMin%60).padStart(2,"0")}m`),h("div",{class:"k"},`trained in ${MON[now.getMonth()]}`)),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},Math.round(re4)),h("div",{class:"k"},"Strava relative effort / week · 4-wk avg")),
+      h("div",{class:"stat",style:"--c:var(--fit)"},h("div",{class:"v"},F.runs.reduce((s,r)=>s+r.prs,0)),h("div",{class:"k"},"Strava PRs on runs · 26 weeks"))))}
+  if(F.A.length){const ins=fInsights(F);if(ins.length)v.append(h("section",{class:"card",style:"--c:var(--fit)"},h("div",{class:"card-h"},h("h2",null,"What the data says"),h("span",{class:"muted",style:"font-size:.85rem"},"Auto-generated from your last 26 weeks")),h("ul",{class:"hlist"},...ins.map(([e,t])=>h("li",null,h("span",{class:"he"},e),h("span",{html:t}))))))}
+  const W12=()=>F.W.slice(-12),lbW=w=>"Week of "+fmtShort(pd(w.date)),mf=v=>v>=60?`${Math.floor(v/60)}h ${String(Math.round(v%60)).padStart(2,"0")}m`:Math.round(v)+"m";
+  const KS=[{k:"run",l:"Run",c:FC.run},{k:"lift",l:"Lift",c:FC.lift},{k:"walk",l:"Walk/ruck/hike",c:FC.walk},{k:"other",l:"Other",c:FC.other}];
+  const Z={
+    vol:{title:"Weekly training time",weekly:true,unit:"week",data:()=>F.W,render:A=>fzStack(A,KS,{fmt:mf,lab:lbW,label:"Training minutes per week by type"}),label:lbW,items:[{l:"Total",g:w=>w.run+w.lift+w.walk+w.other,f:mf},...KS.map(k=>({l:k.l,g:w=>w[k.k],f:mf,c:k.c})),{l:"Sessions",g:w=>w.n},{l:"Relative effort",g:w=>w.re}]},
+    miles:{title:"Weekly running miles",weekly:true,unit:"week",data:()=>F.W,render:A=>hzBars(A,"mi",{c:FC.run,c2:FC.run,label:"Running miles per week",u:" mi"}),label:lbW,items:[{l:"Miles",g:w=>w.mi,f:v=>v.toFixed(1)+" mi",c:FC.run},{l:"Runs",g:w=>w.runs},{l:"Longest",g:w=>w.long||null,f:v=>v.toFixed(1)+" mi"},{l:"Avg pace",g:w=>w.pace,f:v=>fPace(v)+" /mi"}]},
+    pace:{title:"Run pace",weekly:true,unit:"run",data:()=>F.pr,render:A=>hzLine(A,[{key:"pace",c:FC.pace,l:"pace"}],{label:"Average pace per run",fmt:fPace,invert:true}),label:r=>`${r.name} · ${fmtShort(pd(r.date))}`,note:"Average pace of every run over 1 mile. Higher on the chart = faster.",items:[{l:"Pace",g:r=>r.pace,f:v=>fPace(v)+" /mi",c:FC.pace},{l:"Distance",g:r=>r.mi,f:v=>v.toFixed(2)+" mi"},{l:"Moving time",g:r=>r.mt,f:v=>fmtTime(v)},{l:"Elevation",g:r=>r.elev,f:v=>v+" ft"},{l:"Relative effort",g:r=>r.re},{l:"Cadence",g:r=>r.cad,f:v=>v+" spm"}]},
+    dist:{title:"Run distance",weekly:true,unit:"run",data:()=>F.runs,render:A=>hzBars(A.map(r=>({...r})),"mi",{c:FC.run,c2:"#B8321A",goal:13.1,label:"Distance per run",u:" mi"}),label:r=>`${r.name} · ${fmtShort(pd(r.date))}`,note:"Every run, with the 13.1-mile half marathon distance marked.",items:[{l:"Distance",g:r=>r.mi,f:v=>v.toFixed(2)+" mi",c:FC.run},{l:"Pace",g:r=>r.pace,f:v=>fPace(v)+" /mi"},{l:"Moving time",g:r=>r.mt,f:v=>fmtTime(v)},{l:"Calories",g:r=>r.cal}]},
+    cad:{title:"Running cadence",weekly:true,unit:"run",data:()=>F.runs.filter(r=>r.cad),render:A=>hzLine(A,[{key:"cad",c:FC.cad,u:" spm",l:"cadence"}],{label:"Cadence per run"}),label:r=>`${r.name} · ${fmtShort(pd(r.date))}`,note:"Steps per minute from your watch. Around 170–180 spm is a common target for efficient running.",items:[{l:"Cadence",g:r=>r.cad,f:v=>v+" spm",c:FC.cad},{l:"Pace",g:r=>r.pace,f:v=>fPace(v)+" /mi"},{l:"Distance",g:r=>r.mi,f:v=>v.toFixed(2)+" mi"}]},
+    lvol:{title:"Lifting volume",weekly:true,unit:"session",data:()=>F.lifts,render:A=>hzBars(A,"vol",{c:FC.vol,c2:FC.vol,label:"Volume per lifting session",u:" lb"}),label:l=>`${l.name} · ${fmtShort(pd(l.date))}`,note:"Total weight × reps for every logged set in a session (from your Garmin lifts).",items:[{l:"Volume",g:l=>l.vol,f:v=>Math.round(v).toLocaleString()+" lb",c:FC.vol},{l:"Sets with weight",g:l=>l.sets},{l:"Duration",g:l=>l.min,f:v=>v+" min"}]}};
+  if(F.A.length){
+    v.append(h("div",{class:"split"},
+      hCardZ(Z.vol,"Weekly training time","Minutes per week by type · 26 weeks",fzStack(F.W,KS,{fmt:mf,lab:lbW,label:"Training minutes per week"}),"",h("div",{class:"hleg"},...KS.map(k=>h("span",null,h("i",{style:`background:${k.c}`}),k.l)))),
+      hCard("Training calendar","Darker = longer session · 26 weeks",`<div style="overflow-x:auto"><div style="min-width:420px">${heatmap()}</div></div>`,"",null)));
+    v.append(h("div",{class:"split"},
+      hCardZ(Z.miles,"Weekly running miles","Last 12 weeks",hzBars(W12(),"mi",{c:FC.run,c2:FC.run,label:"Running miles per week",u:" mi"}),"No runs yet."),
+      hCardZ(Z.pace,"Run pace","Every run over 1 mi · higher = faster",hzLine(F.pr,[{key:"pace",c:FC.pace,l:"pace"}],{label:"Average pace per run",fmt:fPace,invert:true}),"Runs show up here.")));
+    const sc=hzScatter(F.pr.map(r=>({x:r.mi,y:+(r.pace/60).toFixed(2),tip:`${r.name} · ${fmtShort(pd(r.date))}: ${r.mi.toFixed(2)} mi at ${fPace(r.pace)}/mi`})),"Miles","Pace (min/mi)");
+    v.append(h("div",{class:"split"},
+      hCard("Pace vs. distance",sc?`${F.pr.length} runs · r = ${sc.r.toFixed(2)}`:"",sc?sc.svg:null,"Needs a few runs.",sc?h("p",{class:"hins",style:"margin:0 0 8px"},`Each extra mile adds about ${Math.abs(sc.b*60).toFixed(0)} sec/mi ${sc.b>=0?"slower":"faster"} on average. Y axis is minutes per mile (lower = faster).`):null),
+      hCardZ(Z.cad,"Running cadence","Steps per minute per run",hzLine(F.runs.filter(r=>r.cad),[{key:"cad",c:FC.cad,u:" spm",l:"cadence"}],{label:"Cadence per run"}),"Cadence shows up from your watch runs.")));
+    /* race build */
+    const days=Math.round((pd("2026-12-20")-now)/864e5);
+    if(days>=0){const lr=Math.max(0,...F.runs.map(r=>r.mi));const last6=F.W.slice(-6).reduce((s,w)=>s+w.runs,0);
+      v.append(h("section",{class:"card hcard hwide",style:"--c:var(--fit)"},h("div",{class:"card-h"},h("h2",null,"Half marathon build · Sun 20 Dec"),h("span",{class:"muted",style:"font-size:.85rem"},`${days} days out`)),
+        h("div",{class:"grid g4",style:"margin-bottom:12px"},
+          h("div",{class:"stat"},h("div",{class:"v"},days),h("div",{class:"k"},"days to race")),
+          h("div",{class:"stat"},h("div",{class:"v"+(lr<8?" dn":"")},lr.toFixed(1)+" mi"),h("div",{class:"k"},"longest run · 26 weeks")),
+          h("div",{class:"stat"},h("div",{class:"v"+(last6<6?" dn":"")},last6),h("div",{class:"k"},"runs in the last 6 weeks")),
+          h("div",{class:"stat"},h("div",{class:"v"},(13.1-lr).toFixed(1)+" mi"),h("div",{class:"k"},"gap from longest run to 13.1"))),
+        h("div",{html:hzBars(F.W,"long",{c:FC.run,c2:"#B8321A",goal:13.1,label:"Longest run each week",u:" mi",h:190})||""}),
+        h("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"},h("span",{class:"muted",style:"font-size:.88rem;flex:1;min-width:220px"},"Longest run each week for 26 weeks, against the 13.1-mile race distance."),
+          h("a",{class:"btn",href:"https://claude.ai/artifact/XLu8iCDrR9AP2A5Wb7oe4q",target:"_blank",rel:"noopener",style:"--c:var(--fit)"},"Open my half marathon plan"))))}
   }
   /* strength */
-  const ex=strengthData();const names=Object.keys(ex).sort((a,b)=>ex[b].length-ex[a].length);
-  if(!S.ui.ex||!ex[S.ui.ex])S.ui.ex=names.find(n=>/bench/i.test(n))||names[0]||null;
-  const st=h("section",{class:"card",style:"--c:var(--fit)"},h("div",{class:"card-h"},h("h2",null,"Strength over time"),h("span",{class:"muted",style:"font-size:.85rem"},"Heaviest set per session · ★ logged PR")));
-  if(names.length){st.append(h("div",{class:"chips",style:"margin-bottom:10px"},names.slice(0,10).map(n=>h("button",{type:"button",class:"chip","aria-pressed":String(S.ui.ex===n),style:"--c:var(--fit)",onclick:()=>{S.ui.ex=n;render()}},n))));
-    st.append(ex[S.ui.ex].length>1?h("div",{html:lineChart(ex[S.ui.ex],"lb")}):h("div",{class:"empty"},`Only one session of ${S.ui.ex} so far. The line fills in as you train.`))}
+  const names=Object.keys(F.EX).sort((a,b)=>F.EX[b].length-F.EX[a].length);
+  if(!S.ui.ex||!F.EX[S.ui.ex])S.ui.ex=names.find(n=>/bench/i.test(n))||names[0]||null;
+  const E=S.ui.ex?F.EX[S.ui.ex]:[];
+  const Zs={title:`${S.ui.ex||"Lift"} over time`,weekly:true,unit:"session",data:()=>E,render:A=>hzLine(A,[{key:"top",c:FC.top,u:" lb",l:"top set"},{key:"e1",c:FC.e1,u:" lb",l:"est. 1RM"}],{label:"Top set and estimated 1RM"}),label:x=>fmtD(x.date)+(x.pr?" · logged PR":""),note:"Top set = heaviest set that day. Estimated 1RM uses the Epley formula (weight × (1 + reps/30)) on sets of 12 reps or fewer.",items:[{l:"Top set",g:x=>x.top||null,f:(v,x)=>`${Math.round(v)} lb × ${x.reps}`,c:FC.top},{l:"Est. 1RM",g:x=>x.e1||null,f:v=>v+" lb",c:FC.e1},{l:"Sets",g:x=>x.sets},{l:"Volume",g:x=>x.vol||null,f:v=>Math.round(v).toLocaleString()+" lb"}]};
+  const st=h("section",{class:"card hcard hwide",style:"--c:var(--fit)"},h("div",{class:"card-h"},h("h2",null,"Strength over time"),h("span",{class:"muted",style:"font-size:.85rem"},"Top set and estimated 1RM per session · sets Garmin named, plus PRs you log")));
+  if(names.length){st.append(h("div",{class:"chips",style:"margin-bottom:10px"},names.slice(0,12).map(n=>h("button",{type:"button",class:"chip","aria-pressed":String(S.ui.ex===n),style:"--c:var(--fit)",onclick:e=>{e.stopPropagation();S.ui.ex=n;render()}},`${n} · ${F.EX[n].length}`))));
+    if(E.length>1){st.append(h("div",{class:"hleg"},h("span",null,h("i",{style:`background:${FC.top}`}),"Top set"),h("span",null,h("i",{style:`background:${FC.e1}`}),"Est. 1RM"),h("span",{class:"muted"},`best ${Math.max(...E.map(x=>x.top))} lb · est. 1RM ${Math.max(...E.map(x=>x.e1))} lb`)));st.append(h("div",{html:hzLine(E,[{key:"top",c:FC.top,u:" lb",l:"top set"},{key:"e1",c:FC.e1,u:" lb",l:"est. 1RM"}],{label:"Top set and estimated 1RM"})}));hzBind(st,Zs)}
+    else st.append(h("div",{class:"empty"},`Only one session of ${S.ui.ex} so far. The line fills in as you train.`))}
   else st.append(h("div",{class:"empty"},S.strava.setsStatus==="loading"?"Loading sets from your Garmin lifts…":"Lifts with named exercises from Garmin, or PRs you log below, show up here."));
   v.append(st);
+  if(F.lifts.length||Object.keys(F.mg).length){const mrows=Object.entries(F.mg).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([l,v])=>({l,v}));
+    v.append(h("div",{class:"split"},
+      hCardZ(Z.lvol,"Lifting volume","Weight × reps per session",hzBars(F.lifts,"vol",{c:FC.vol,c2:FC.vol,label:"Volume per lifting session",u:" lb"}),"Logged sets show up here."),
+      hCard("Muscle groups","Sets that hit each group · last 30 days",fzHBars(mrows,FC.lift),"Named exercises from your Garmin lifts show up here.")))}
+  if(F.A.length){const recs=[];const by=(arr,f)=>arr.length?arr.reduce((m,x)=>f(x)>f(m)?x:m):null;
+    const lr=by(F.runs,r=>r.mi),fr=F.pr.length?F.pr.reduce((m,x)=>x.pace<m.pace?x:m):null,er=by(F.runs,r=>r.re||0),el=by(F.A,a=>(a.summary&&a.summary.elevation_gain)||0),ca=by(F.A,a=>(a.summary&&a.summary.total_calories)||0),lg=by(F.A,a=>(a.summary&&a.summary.moving_time)||0);
+    if(lr)recs.push(["Longest run",`${lr.mi.toFixed(2)} mi`,lr.name,lr.date]);if(fr)recs.push(["Fastest run pace",`${fPace(fr.pace)} /mi`,`${fr.name} · ${fr.mi.toFixed(1)} mi`,fr.date]);if(er&&er.re)recs.push(["Hardest run (effort)",String(er.re),er.name,er.date]);
+    if(lg)recs.push(["Longest session",hm(lg.summary.moving_time/60),lg.name,lg.start_local]);if(el&&el.summary.elevation_gain)recs.push(["Most climbing",`${Math.round(el.summary.elevation_gain*3.281).toLocaleString()} ft`,el.name,el.start_local]);if(ca&&ca.summary.total_calories)recs.push(["Most calories",ca.summary.total_calories.toLocaleString(),ca.name,ca.start_local]);
+    v.append(h("div",{class:"split"},
+      hCard("When you train","Workouts by day and time of day · 26 weeks",fzWhen(F.A),""),
+      hCard("Records","Best marks in the last 26 weeks",`<table class="htab"><thead><tr><th>Record</th><th>Mark</th><th>Activity</th></tr></thead><tbody>${recs.map(([k,m,n,d])=>`<tr><td><b>${esc(k)}</b></td><td style="font-weight:800;color:var(--fit)">${esc(m)}</td><td>${esc(n)}<div class="muted" style="font-size:.8rem">${esc(fmtShort(pd(d.slice(0,10))))}</div></td></tr>`).join("")}</tbody></table>`,"")))}
   /* PR + goals */
   const known=[...new Set([...names,...S.docs.fit.prs.map(p=>p.lift),"Bench Press","Squat","Deadlift","Two-mile run"])];
   const dl=h("datalist",{id:"lifts"},known.map(n=>h("option",{value:n})));
@@ -1676,14 +1777,14 @@ const hzX=(n,W,ml,mr)=>i=>ml+(n<=1?0:(W-ml-mr)*i/(n-1));
 function hzScale(vals,padF=.15,zero=false){let lo=Math.min(...vals),hi=Math.max(...vals);const p=Math.max(1,(hi-lo)*padF);lo=zero?0:Math.floor(lo-p);hi=Math.ceil(hi+p);return[lo,hi]}
 function hzAxis(lo,hi,Y,W,ml,mr,fmt=v=>v){let s="";const st=niceStep((hi-lo)/4);for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)s+=`<line class="gl" x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${ml-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`;return s}
 function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r||1))),m=r/p;return (m<1.5?1:m<3?2:m<7?5:10)*p}
-function hzDates(D,X,H,mb){let s="";const n=D.length,k=Math.max(1,Math.ceil(n/7));D.forEach((d,i)=>{if(i%k===0||i===n-1)s+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${fmtShort(pd(d.date))}</text>`});return s}
+function hzDates(D,X,H,mb){let s="";const n=D.length,k=Math.max(1,Math.ceil(n/7));D.forEach((d,i)=>{if((i%k===0&&n-1-i>=k*.6)||i===n-1)s+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${fmtShort(pd(d.date))}</text>`});return s}
 function hzLine(D,keys,opt={}){const W=640,H=opt.h||220,ml=40,mr=14,mt=16,mb=24;const vals=D.flatMap(d=>keys.map(k=>d[k.key]).concat(opt.band?[d[opt.band[0]],d[opt.band[1]]]:[])).filter(v=>v!=null);if(vals.length<2)return null;
-  const [lo,hi]=hzScale(vals);const X=hzX(D.length,W,ml,mr),Y=v=>mt+(H-mt-mb)*(1-(v-lo)/(hi-lo||1));let s=`<svg class="chart" ${hzA(ml,W-ml-mr,D.length,"pt",mt,H-mb)} viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(lo,hi,Y,W,ml,mr);
+  const [lo,hi]=hzScale(vals);const X=hzX(D.length,W,ml,mr),Y=v=>mt+(H-mt-mb)*(opt.invert?(v-lo)/(hi-lo||1):1-(v-lo)/(hi-lo||1));const FM=opt.fmt||(x=>x);let s=`<svg class="chart" ${hzA(ml,W-ml-mr,D.length,"pt",mt,H-mb)} viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(lo,hi,Y,W,ml,mr,opt.fmt);
   if(opt.band){const up=D.map((d,i)=>d[opt.band[1]]!=null?`${X(i)},${Y(d[opt.band[1]])}`:null).filter(Boolean),dn=D.map((d,i)=>d[opt.band[0]]!=null?`${X(i)},${Y(d[opt.band[0]])}`:null).filter(Boolean).reverse();if(up.length)s+=`<polygon points="${up.join(" ")} ${dn.join(" ")}" fill="${keys[0].c}" opacity=".12"/>`}
   for(const k of keys){const pts=D.map((d,i)=>d[k.key]!=null?[X(i),Y(d[k.key]),d]:null).filter(Boolean);if(!pts.length)continue;const p=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+","+q[1].toFixed(1)).join("");
     if(opt.area)s+=`<path d="${p}L${pts.at(-1)[0]},${H-mb}L${pts[0][0]},${H-mb}Z" fill="${k.c}" opacity=".1"/>`;s+=`<path d="${p}" fill="none" stroke="${k.c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
-    pts.forEach((q,i)=>{s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${i===pts.length-1?5:2.6}" fill="${k.c}"/><circle cx="${q[0]}" cy="${q[1]}" r="10" fill="transparent" data-tip="${esc(fmtD(q[2].date))}: ${q[2][k.key]}${k.u||""} ${esc(k.l||"")}"/>`});
-    const L=pts.at(-1);s+=`<text class="lab" x="${L[0]-8}" y="${L[1]-10}" text-anchor="end" style="fill:${k.c}">${L[2][k.key]}${k.u||""}</text>`}
+    pts.forEach((q,i)=>{s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${i===pts.length-1?5:2.6}" fill="${k.c}"/><circle cx="${q[0]}" cy="${q[1]}" r="10" fill="transparent" data-tip="${esc(fmtD(q[2].date))}: ${FM(q[2][k.key])}${k.u||""} ${esc(k.l||"")}"/>`});
+    const L=pts.at(-1);s+=`<text class="lab" x="${L[0]-8}" y="${L[1]-10}" text-anchor="end" style="fill:${k.c}">${FM(L[2][k.key])}${k.u||""}</text>`}
   return s+hzDates(D,X,H,mb)+`</svg>`}
 function hzBars(D,key,opt={}){const W=640,H=opt.h||200,ml=44,mr=14,mt=14,mb=24;const vals=D.map(d=>d[key]).filter(v=>v!=null);if(!vals.length)return null;const hi=Math.max(...vals,opt.goal||0)*1.12;const bw=(W-ml-mr)/D.length;const Y=v=>mt+(H-mt-mb)*(1-v/hi);
   let s=`<svg class="chart" ${hzA(ml,W-ml-mr,D.length,"bar",mt,H-mb)} viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label||"")}">`+hzAxis(0,hi,Y,W,ml,mr,v=>v>=1000?(v/1000)+"k":v);
@@ -1804,7 +1905,7 @@ function hzKey(e){if(!HZ)return;if(e.key==="Escape"){hzClose();return}
 function hzDraw(){const m=document.getElementById("hzm"),sp=HZ.spec;const all=sp.data()||[];const arr=sp.weekly?all:all.slice(-HZ.rng);HZ.arr=arr;if(HZ.i==null||HZ.i>=arr.length)HZ.i=arr.length-1;
   const svg=arr.length?sp.render(arr):null;
   m.replaceChildren(h("div",{class:"hzbox"},
-    h("div",{class:"hzhd"},h("div",{style:"min-width:0"},h("div",{class:"eyebrow",style:`--c:${HC.teal}`},"Health"),h("h2",null,sp.title),h("div",{class:"muted",style:"font-size:.88rem"},sp.note||"Hover the chart (or use ← →) to read exact values for each "+(sp.weekly?"week":"day")+".")),
+    h("div",{class:"hzhd"},h("div",{style:"min-width:0"},h("div",{class:"eyebrow",style:`--c:${HC.teal}`},"Health"),h("h2",null,sp.title),h("div",{class:"muted",style:"font-size:.88rem"},sp.note||"Hover the chart (or use ← →) to read exact values for each "+(sp.unit||(sp.weekly?"week":"day"))+".")),
       h("div",{class:"hzctl"},sp.weekly?null:h("div",{class:"hseg",role:"group","aria-label":"Range"},...[14,30,90].map(n=>h("button",{type:"button","aria-pressed":String(HZ.rng===n),onclick:()=>{HZ.rng=n;HZ.i=null;hzDraw()}},n+" days"))),
         h("button",{type:"button",class:"hzx","aria-label":"Close",onclick:hzClose},"✕"))),
     h("div",{class:"hzbody"},svg?h("div",{class:"hzchart",html:svg}):h("div",{class:"hempty"},h("p",null,"No data in this range.")),h("div",{class:"hzread",id:"hzread","aria-live":"polite"})),
@@ -1823,7 +1924,7 @@ function hzMark(){const sp=HZ.spec,d=HZ.arr[HZ.i];const r=document.getElementByI
 function hzStats(){const sp=HZ.spec,el=document.getElementById("hzstats");if(!el)return;const it=sp.items[0];const P=HZ.arr.map(d=>({d,v:it.g(d)})).filter(o=>o.v!=null&&!Number.isNaN(o.v));if(sp.noStats||!P.length){el.replaceChildren();return}
   const f=v=>it.f?it.f(v,{}):String(Math.round(v*10)/10);const avg=P.reduce((a,o)=>a+o.v,0)/P.length;const hi=P.reduce((a,o)=>o.v>a.v?o:a),lo=P.reduce((a,o)=>o.v<a.v?o:a);const lab=d=>sp.label?sp.label(d):fmtShort(pd(d.date));
   const half=Math.floor(P.length/2);const a1=half?P.slice(0,half).reduce((a,o)=>a+o.v,0)/half:null,a2=half?P.slice(half).reduce((a,o)=>a+o.v,0)/(P.length-half):null;
-  const cells=[["Average",f(avg)],["Highest",f(hi.v),lab(hi.d)],["Lowest",f(lo.v),lab(lo.d)],[sp.weekly?"Weeks with data":"Days with data",`${P.length} of ${HZ.arr.length}`]];
+  const cells=[["Average",f(avg)],["Highest",f(hi.v),lab(hi.d)],["Lowest",f(lo.v),lab(lo.d)],[sp.unit?sp.unit[0].toUpperCase()+sp.unit.slice(1)+"s with data":sp.weekly?"Weeks with data":"Days with data",`${P.length} of ${HZ.arr.length}`]];
   if(!sp.noTrend&&a1!=null&&P.length>=6)cells.push(["Trend",(a2-a1>=0?"▲ ":"▼ ")+f(Math.abs(a2-a1)),"2nd half vs 1st half"]);
   el.replaceChildren(...cells.map(([k,v,sub])=>h("div",{class:"stat"},h("div",{class:"k"},`${k} · ${it.l}`),h("div",{class:"v",style:"font-size:1.35rem"},v),sub?h("div",{class:"k"},sub):null)))}
 function viewHealth(v){
@@ -1940,6 +2041,7 @@ function stravaEffortWeeks(){const A=(S.strava&&S.strava.acts)||[];if(!A.length)
   const D=[];for(let i=weeks-1;i>=0;i--){const d=new Date(m0);d.setDate(d.getDate()-7*i);D.push({date:iso(d),e:W[iso(d)]||0})}return hzBars(D,"e",{c:HC.load,c2:HC.load,label:"Weekly relative effort",u:" effort"})}
 function viewProjects(v){
   const P=S.docs.projects.projects||[];
+  if(S.ui.project==="rush"){v.append(h("div",null,h("button",{type:"button",class:"ghost",onclick:()=>{S.ui.project=null;render();scrollTo(0,0)}},"← All projects")));viewRush(v);return}
   if(S.ui.project){const p=P.find(x=>x.id===S.ui.project);if(p)return p.type==="movies"?viewMovies(v,p):p.type==="research"?viewResearch(v,p):null;S.ui.project=null}
   v.append(h("header",null,h("div",{class:"eyebrow",style:"--c:var(--vb)"},"Side quests & collabs"),h("h1",null,"Projects"),h("p",{class:"sub"},"Things I'm building, tracking or competing at. Tap a project to explore it.")));
   const g=h("div",{class:"trips"});
@@ -1947,7 +2049,16 @@ function viewProjects(v){
     h("div",{class:"cov"+(p.type==="research"&&!p.cover?" rescov":""),style:coverStyle(p)},h("div",null,h("h3",null,p.title),h("div",{style:"font-weight:600;font-size:.9rem;opacity:.95"},p.subtitle||""))),
     h("div",{class:"tb"},h("div",{style:"font-weight:700"},p.type==="movies"?`${(S.docs.movies.list||[]).length} movies reviewed`:p.type==="research"?resLine(p):""),h("div",{class:"muted",style:"font-size:.86rem"},p.blurb||""))));
   g.append(h("div",{class:"trip",style:"cursor:default;border-style:dashed;justify-content:center;align-items:center;padding:24px;text-align:center;min-height:200px"},h("div",{style:"font:800 1.2rem var(--display);text-transform:uppercase"},"Next project"),h("div",{class:"muted",style:"font-size:.88rem;max-width:30ch"},"Tell Claude about it and it gets its own page here.")));
-  v.append(g)
+  v.append(g);
+  v.append(h("header",{style:"margin-top:30px"},h("div",{class:"eyebrow",style:"--c:#C2187A"},"Built for the boys"),h("h2",{style:"font:900 1.6rem var(--display);text-transform:uppercase;margin:4px 0 0"},"Games")));
+  const gg=h("div",{class:"trips"});
+  gg.append(h("div",{class:"trip gtile",role:"button",tabindex:"0",onclick:e=>{if(e.target.closest("a"))return;S.ui.project="rush";render();scrollTo(0,0)},onkeydown:e=>{if(e.key==="Enter"&&e.target===e.currentTarget){S.ui.project="rush";render();scrollTo(0,0)}}},
+    h("div",{class:"cov gcov"},h("div",{class:"gart",html:'<svg viewBox="0 0 300 200" aria-hidden="true"><defs><linearGradient id="gts" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB25A"/><stop offset="1" stop-color="#FF5E8A"/></linearGradient></defs><circle cx="215" cy="62" r="34" fill="url(#gts)"/><path d="M0 200 L120 70 L150 110 L190 60 L300 200Z" fill="#1E4D33"/><path d="M60 200 L150 110 L240 200Z" fill="#2F6B45"/><path d="M110 200 L150 150 L190 200Z" fill="#E8D9B0"/><g transform="translate(140 158)"><circle cx="6" cy="-14" r="5" fill="#FFD7B0"/><path d="M0 -8 L10 -8 L13 6 L4 6Z" fill="#2E8B57"/><path d="M4 6 L-2 18 M10 6 L16 16" stroke="#FFF" stroke-width="3" stroke-linecap="round"/></g></svg>'}),
+      h("div",null,h("h3",null,"Runaway Rush"),h("div",{style:"font-weight:600;font-size:.9rem;opacity:.95"},"Endless runner · JB vs. Bridger"))),
+    h("div",{class:"tb",style:"display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"},h("div",{class:"muted",style:"font-size:.86rem"},"2 runners · tap for characters and controls"),
+      h("a",{class:"btn",href:RUSH_URL,target:"_blank",rel:"noopener",style:"--c:#C2187A"},"▶ Play"))));
+  gg.append(h("div",{class:"trip",style:"cursor:default;border-style:dashed;justify-content:center;align-items:center;padding:24px;text-align:center;min-height:200px"},h("div",{style:"font:800 1.2rem var(--display);text-transform:uppercase"},"Next game"),h("div",{class:"muted",style:"font-size:.88rem;max-width:30ch"},"Build it with Claude and it shows up here.")));
+  v.append(gg)
 }
 function mstats(L){
   const n=L.length,avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
@@ -2261,7 +2372,7 @@ function musicReady(){M.ready=true;if(M.open){watchPlaylists();watchNP();paintMu
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&M.open)closeMusic()});
   $("#msearch").addEventListener("submit",e=>{e.preventDefault();const q=$("#mq").value.trim();if(q)spotSearch(q,q)})})();
 /* ---------- boot ---------- */
-(function(){let r=(location.hash||"").slice(1);if(!ROUTES.some(x=>x.id===r)){try{r=localStorage.getItem("hub:route")}catch(e){}}if(ROUTES.some(x=>x.id===r))S.route=r})();
+(function(){let r=(location.hash||"").slice(1);if(r==="rush"){S.route="projects";S.ui.project="rush";return}if(!ROUTES.some(x=>x.id===r)){try{r=localStorage.getItem("hub:route")}catch(e){}}if(r==="rush"){S.route="projects";S.ui.project="rush";return}if(ROUTES.some(x=>x.id===r))S.route=r})();
 render();
 async function loadDocs(){const snaps=await Promise.all(DOCS.map(n=>S.db.doc(`data/users/${S.uid}/${n}`).get().catch(()=>null)));
   snaps.forEach((s,i)=>{const n=DOCS[i];if(s&&s.exists){const d=JSON.parse(JSON.stringify(s.data()));S.docs[n]=Object.assign(JSON.parse(JSON.stringify(EMPTY[n])),d)}})}
