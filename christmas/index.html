@@ -89,10 +89,87 @@
   footer{text-align:center;color:#fff;margin-top:36px;line-height:1.6}
   footer .big{font-family:'Mountains of Christmas',cursive;font-size:1.7rem;color:var(--gold)}
   footer small{opacity:.75}
+
+  /* ===== Single & Ready to Mingle ===== */
+  .mingle-btn{position:fixed;top:12px;right:12px;z-index:20;border:3px solid #fff;background:var(--gold);color:var(--red-dk);
+    font:inherit;font-weight:700;font-size:.85rem;padding:8px 12px;border-radius:999px;cursor:pointer;
+    box-shadow:0 4px 0 var(--red-dk),0 6px 16px rgba(0,0,0,.3);animation:wiggle 4s ease-in-out infinite}
+  .mingle-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-dk)}
+  @keyframes wiggle{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-6deg)}94%{transform:rotate(6deg)}97%{transform:rotate(-3deg)}}
+  @media (prefers-reduced-motion:reduce){.mingle-btn{animation:none}}
+  header{padding-top:64px}
+
+  .modal-bg{position:fixed;inset:0;z-index:30;background:rgba(10,30,18,.75);display:none;align-items:center;justify-content:center;padding:16px}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--cream);border:4px solid #fff;border-radius:24px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;
+    box-shadow:0 8px 0 var(--red-dk),0 20px 40px rgba(0,0,0,.4);position:relative;animation:pop .25s ease-out}
+  @keyframes pop{from{transform:scale(.85);opacity:0}}
+  .m-head{background:repeating-linear-gradient(-45deg,var(--red) 0 16px,var(--red-dk) 16px 32px);color:#fff;text-align:center;padding:22px 16px 18px;border-radius:20px 20px 0 0}
+  .m-close{position:absolute;top:10px;right:12px;background:#fff;color:var(--red);border:none;width:34px;height:34px;border-radius:50%;
+    font-size:1.2rem;font-weight:700;cursor:pointer}
+  .m-avatar{font-size:3.4rem;line-height:1}
+  .m-name{font-family:'Mountains of Christmas',cursive;font-size:2.3rem;line-height:1;margin-top:6px}
+  .m-tag{font-size:.85rem;opacity:.95;margin-top:4px}
+  .m-body{padding:18px}
+  .m-label{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px}
+  .m-label:first-child{margin-top:0}
+  .stats{list-style:none;display:grid;gap:7px}
+  .stats li{display:flex;gap:10px;align-items:flex-start;line-height:1.35}
+  .stats b{color:var(--red-dk)}
+  .bar{height:16px;border-radius:8px;background:#eadfd3;overflow:hidden;border:2px solid #fff;box-shadow:0 0 0 1px #d9c9b9}
+  .bar span{display:block;height:100%;width:0;background:repeating-linear-gradient(-45deg,var(--green) 0 10px,#17a556 10px 20px);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+  .bar-row{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin:8px 0 4px}
+  .flags{display:flex;flex-wrap:wrap;gap:6px}
+  .flags span{font-size:.8rem;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--mint);color:var(--green-dk)}
+  .flags.red span{background:var(--blush);color:var(--red-dk)}
+  .m-cta{margin-top:18px;text-align:center;background:var(--green);color:#fff;border-radius:16px;padding:14px;font-weight:600;line-height:1.4}
+  .m-cta small{display:block;opacity:.85;font-weight:400;margin-top:4px}
+  .m-fine{text-align:center;font-size:.72rem;color:var(--muted);margin-top:12px}
 </style>
 </head>
 <body>
 <div class="snow" id="snow" aria-hidden="true"></div>
+
+<button class="mingle-btn" id="mingleBtn" aria-haspopup="dialog">💘 Single &amp; Ready to Mingle</button>
+
+<div class="modal-bg" id="mingle" role="dialog" aria-modal="true" aria-labelledby="mName">
+  <div class="modal">
+    <button class="m-close" id="mingleClose" aria-label="Close">✕</button>
+    <div class="m-head">
+      <div class="m-avatar">🎖️</div>
+      <div class="m-name" id="mName">Meet Ethan</div>
+      <div class="m-tag">Tonight's bartender · Eligible bachelor · Highly qualified</div>
+    </div>
+    <div class="m-body">
+      <div class="m-label">The Résumé</div>
+      <ul class="stats">
+        <li>🪖 <span><b>West Point cadet</b>, Class of 2028. Future Army officer, so he has a steady job lined up.</span></li>
+        <li>🏐 <span><b>Outside hitter</b> on Men's Army Volleyball. Tall, athletic, and can jump higher than your expectations.</span></li>
+        <li>📊 <span><b>Operations Research major.</b> Has literally studied how to optimize things, including your daughter's happiness.</span></li>
+        <li>😂 <span><b>Funny.</b> Built this button, didn't he?</span></li>
+        <li>🍸 <span><b>Makes a great cocktail.</b> Exhibit A: the menu you're looking at.</span></li>
+      </ul>
+
+      <div class="m-label">Compatibility Analysis</div>
+      <div class="bar-row"><span>Boyfriend Material</span><span>99%</span></div>
+      <div class="bar"><span data-w="99"></span></div>
+      <div class="bar-row"><span>Parent Approval Rating</span><span>110%</span></div>
+      <div class="bar"><span data-w="100"></span></div>
+      <div class="bar-row"><span>Humility</span><span>4%</span></div>
+      <div class="bar"><span data-w="4"></span></div>
+
+      <div class="m-label">Green Flags</div>
+      <div class="flags"><span>Opens doors</span><span>Calls his mom</span><span>Up at 0600 anyway</span><span>Makes the bed</span><span>Plans the trips</span></div>
+
+      <div class="m-label">Red Flags</div>
+      <div class="flags red"><span>Will talk about volleyball</span><span>Says "roger that" unironically</span><span>Will make a spreadsheet of your first date</span></div>
+
+      <div class="m-cta">Interested? Ask the bartender for his number.
+        <small>(He is the bartender.)</small></div>
+      <div class="m-fine">Paid for by the Committee to Get Ethan a Date. Results not guaranteed.</div>
+    </div>
+  </div>
+</div>
 
 <div class="wrap">
   <header>
@@ -244,6 +321,20 @@ function renderMenu(){
 })();
 
 renderFilters(); renderMenu();
+
+/* Single & Ready to Mingle pop-up */
+(function(){
+  const bg=document.getElementById("mingle");
+  const open=()=>{
+    bg.classList.add("open"); document.body.style.overflow="hidden";
+    bg.querySelectorAll(".bar span").forEach(s=>{s.style.width="0";requestAnimationFrame(()=>requestAnimationFrame(()=>s.style.width=s.dataset.w+"%"));});
+  };
+  const close=()=>{bg.classList.remove("open"); document.body.style.overflow="";};
+  document.getElementById("mingleBtn").onclick=open;
+  document.getElementById("mingleClose").onclick=close;
+  bg.addEventListener("click",e=>{if(e.target===bg)close();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+})();
 </script>
 </body>
 </html>
