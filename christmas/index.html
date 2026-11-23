@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ploetz Christmas Bar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#c8102e; --red-dk:#8f0b20; --green:#0f7a3d; --green-dk:#0a4f28;
+    --gold:#f4c430; --cream:#fff8ec; --ink:#2a1a12; --muted:#7a6458;
+    --mint:#e8f6ee; --blush:#fdecee;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;color:var(--ink);
+    background:var(--green-dk);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.06) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 40%, rgba(255,255,255,.05) 0 2px, transparent 3px);
+    background-size:60px 60px, 90px 90px;
+    min-height:100vh;overflow-x:hidden;
+  }
+  /* falling snow */
+  .snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .flake{position:absolute;top:-20px;color:#fff;opacity:.8;animation:fall linear infinite;user-select:none}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.flake{display:none}}
+
+  .wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 16px 48px}
+
+  /* header */
+  header{text-align:center;padding:36px 8px 8px;color:#fff}
+  .lights{display:flex;justify-content:center;gap:14px;margin-bottom:14px}
+  .bulb{width:12px;height:18px;border-radius:50% 50% 45% 45%;animation:blink 1.6s infinite}
+  .bulb:nth-child(4n+1){background:var(--red);box-shadow:0 0 12px var(--red)}
+  .bulb:nth-child(4n+2){background:var(--gold);box-shadow:0 0 12px var(--gold);animation-delay:.4s}
+  .bulb:nth-child(4n+3){background:#2ecc71;box-shadow:0 0 12px #2ecc71;animation-delay:.8s}
+  .bulb:nth-child(4n+4){background:#4aa8ff;box-shadow:0 0 12px #4aa8ff;animation-delay:1.2s}
+  @keyframes blink{50%{opacity:.35;box-shadow:none}}
+  .eyebrow{letter-spacing:.25em;text-transform:uppercase;font-size:.78rem;color:var(--gold);font-weight:600}
+  h1{font-family:'Mountains of Christmas',cursive;font-size:clamp(2.6rem,10vw,4.2rem);line-height:1;margin:8px 0 6px;
+     color:#fff;text-shadow:3px 3px 0 var(--red),6px 6px 0 rgba(0,0,0,.25)}
+  .sub{font-size:1.05rem;opacity:.9}
+  .stripe{height:14px;margin:22px auto 0;max-width:340px;border-radius:7px;
+    background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 28px);box-shadow:0 3px 0 rgba(0,0,0,.2)}
+
+  /* filters */
+  .filters{position:sticky;top:0;z-index:5;display:flex;gap:8px;overflow-x:auto;padding:16px 2px 12px;margin:10px -16px 0;padding-left:16px;padding-right:16px;
+    background:linear-gradient(var(--green-dk) 75%, transparent);scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;border:2px solid #fff;background:transparent;color:#fff;font:inherit;font-weight:600;
+    padding:8px 14px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s}
+  .chip .n{background:rgba(255,255,255,.2);border-radius:999px;padding:0 7px;font-size:.8rem}
+  .chip.on{background:#fff;color:var(--red)}
+  .chip.on .n{background:var(--red);color:#fff}
+
+  /* sections */
+  section{margin-top:26px}
+  .sec-title{display:flex;align-items:center;gap:10px;color:#fff;font-family:'Mountains of Christmas',cursive;font-size:2rem;margin-bottom:12px}
+  .sec-title::after{content:"";flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--gold) 0 8px,transparent 8px 14px)}
+
+  /* cards */
+  .card{position:relative;background:var(--cream);border-radius:20px;padding:18px 18px 16px;margin-bottom:14px;
+    box-shadow:0 6px 0 var(--red-dk),0 10px 24px rgba(0,0,0,.25);border:3px solid #fff;overflow:hidden}
+  .card.mock{box-shadow:0 6px 0 var(--green),0 10px 24px rgba(0,0,0,.25)}
+  .card::before{content:"";position:absolute;top:0;right:0;width:70px;height:70px;
+    background:radial-gradient(circle at 100% 0, var(--blush) 0 70px, transparent 71px)}
+  .card.mock::before{background:radial-gradient(circle at 100% 0, var(--mint) 0 70px, transparent 71px)}
+  .top{display:flex;align-items:flex-start;gap:12px;position:relative}
+  .emoji{font-size:2.2rem;line-height:1;flex:0 0 auto;filter:drop-shadow(0 2px 0 rgba(0,0,0,.1))}
+  .name{font-size:1.35rem;font-weight:700;line-height:1.15}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .pill{font-size:.74rem;font-weight:600;padding:3px 9px;border-radius:999px;background:#fff;border:1.5px solid currentColor}
+  .str-light{color:var(--green)} .str-medium{color:#c77700} .str-strong{color:var(--red)} .str-zero{color:#2a7fd4}
+  .flavor{color:var(--muted)}
+  .ingr{margin-top:12px;font-weight:600;color:var(--red-dk);font-size:.95rem}
+  .card.mock .ingr{color:var(--green-dk)}
+  .desc{margin-top:6px;color:#4a372d;line-height:1.45}
+  .out .top,.out .ingr,.out .desc{opacity:.45}
+  .out-tag{position:absolute;top:14px;right:-34px;transform:rotate(35deg);background:var(--ink);color:#fff;
+    font-weight:700;font-size:.72rem;letter-spacing:.1em;padding:4px 40px}
+
+  .empty{color:#fff;text-align:center;opacity:.8;padding:24px}
+
+  footer{text-align:center;color:#fff;margin-top:36px;line-height:1.6}
+  footer .big{font-family:'Mountains of Christmas',cursive;font-size:1.7rem;color:var(--gold)}
+  footer small{opacity:.75}
+</style>
+</head>
+<body>
+<div class="snow" id="snow" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <div class="lights" aria-hidden="true">
+      <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+      <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+    </div>
+    <div class="eyebrow">Merry Christmas · Now Pouring</div>
+    <h1>The Ploetz<br>Christmas Bar</h1>
+    <p class="sub">Grab a drink, find the mistletoe, and stay a while.</p>
+    <div class="stripe"></div>
+  </header>
+
+  <nav class="filters" id="filters" aria-label="Filter drinks"></nav>
+  <main id="menu"></main>
+
+  <footer>
+    <div class="big">Cheers & Merry Christmas!</div>
+    <p>Don't see what you want? Just ask the bartender.</p>
+    <small>Please drink responsibly and make sure everyone gets home safe.</small>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   EDIT THE MENU HERE
+   strength: "zero" | "light" | "medium" | "strong"
+   type: "cocktail" | "mocktail"
+   out: true  → shows "ALL GONE" ribbon (ran out of something)
+   ============================================================ */
+const SECTIONS = [
+  { id:"festive",  title:"Festive Favorites" },
+  { id:"warm",     title:"Warm & Cozy" },
+  { id:"sparkle",  title:"Bubbly & Bright" },
+  { id:"mocktail", title:"Zero-Proof (Kid & Driver Friendly)" }
+];
+
+const DRINKS = [
+  { section:"festive", type:"cocktail", emoji:"🎅", name:"Santa's Spiked Eggnog", strength:"medium",
+    flavors:["Creamy","Nutmeg"], ingredients:"Eggnog, Bourbon, Spiced Rum, Fresh Nutmeg",
+    desc:"The holiday classic with a little extra cheer. Rich, creamy, and dusted with fresh nutmeg." },
+  { section:"festive", type:"cocktail", emoji:"🍪", name:"Gingerbread White Russian", strength:"strong",
+    flavors:["Dessert","Spiced"], ingredients:"Vodka, Coffee Liqueur, Gingerbread Syrup, Cream",
+    desc:"Tastes like a gingerbread cookie dunked in coffee. Served with a cookie crumble rim." },
+  { section:"festive", type:"cocktail", emoji:"🍬", name:"Candy Cane Martini", strength:"strong",
+    flavors:["Peppermint","Sweet"], ingredients:"Vanilla Vodka, White Chocolate Liqueur, Peppermint Schnapps",
+    desc:"Cool, sweet, and minty with a crushed candy cane rim. Basically Christmas in a glass." },
+
+  { section:"warm", type:"cocktail", emoji:"🍷", name:"Mulled Wine", strength:"light",
+    flavors:["Warm","Cinnamon"], ingredients:"Red Wine, Orange, Cinnamon, Cloves, Star Anise, Honey",
+    desc:"Simmered low all evening so the whole house smells like Christmas. Served warm in a mug." },
+  { section:"warm", type:"cocktail", emoji:"🔥", name:"Fireside Hot Toddy", strength:"medium",
+    flavors:["Warm","Honey & Lemon"], ingredients:"Irish Whiskey, Honey, Lemon, Hot Water, Cinnamon Stick",
+    desc:"For anyone who just came in from the cold. Warms you right up." },
+  { section:"warm", type:"cocktail", emoji:"☕", name:"Spiked Hot Cocoa", strength:"light",
+    flavors:["Chocolate","Cozy"], ingredients:"Hot Chocolate, Peppermint Schnapps or Baileys, Whipped Cream",
+    desc:"Pick your add-in. Topped with whipped cream and sprinkles because it's Christmas." },
+
+  { section:"sparkle", type:"cocktail", emoji:"🥂", name:"The Poinsettia", strength:"light",
+    flavors:["Bubbly","Tart"], ingredients:"Prosecco, Cranberry Juice, Orange Liqueur, Sugared Cranberries",
+    desc:"A bright red holiday sparkler. Light, festive, and great for toasts." },
+  { section:"sparkle", type:"cocktail", emoji:"❄️", name:"Cranberry Christmas Mule", strength:"medium",
+    flavors:["Ginger","Cranberry"], ingredients:"Vodka, Cranberry Juice, Lime, Ginger Beer, Rosemary",
+    desc:"A Moscow Mule in its holiday sweater. Garnished with a rosemary sprig that looks like a little tree.",
+    out:false },
+
+  { section:"mocktail", type:"mocktail", emoji:"🎄", name:"Mistletoe Punch", strength:"zero",
+    flavors:["Fruity","Fizzy"], ingredients:"Lime Sherbet, Pineapple Juice, Lemon-Lime Soda",
+    desc:"Bright green, foamy, and a big hit with the kids. Served from the punch bowl." },
+  { section:"mocktail", type:"mocktail", emoji:"🌲", name:"Rosemary Cranberry Sparkler", strength:"zero",
+    flavors:["Tart","Herbal"], ingredients:"Cranberry Juice, Sparkling Water, Lime, Rosemary Syrup",
+    desc:"All the festive look of a Poinsettia with none of the alcohol." },
+  { section:"mocktail", type:"mocktail", emoji:"⛄", name:"Snowman Hot Cocoa", strength:"zero",
+    flavors:["Chocolate","Marshmallow"], ingredients:"Hot Chocolate, Whipped Cream, Mini Marshmallows",
+    desc:"Classic cocoa with a marshmallow snowman floating on top." }
+];
+
+const STRENGTH = { zero:"Zero-Proof", light:"Light", medium:"Medium", strong:"Strong" };
+
+/* filter chips */
+const FILTERS = [
+  { id:"all",      label:"All",        test:d=>true },
+  { id:"cocktail", label:"🍸 Cocktails", test:d=>d.type==="cocktail" },
+  { id:"mocktail", label:"🧃 Mocktails", test:d=>d.type==="mocktail" },
+  { id:"warm",     label:"🔥 Warm",     test:d=>d.section==="warm" || d.flavors.includes("Warm") },
+  { id:"light",    label:"🌟 Light",    test:d=>d.strength==="light" || d.strength==="zero" }
+];
+
+let current = "all";
+try { current = localStorage.getItem("ploetzFilter") || "all"; } catch(e){}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function renderFilters(){
+  const el = document.getElementById("filters");
+  el.innerHTML = FILTERS.map(f=>{
+    const n = DRINKS.filter(d=>!d.out && f.test(d)).length;
+    return `<button class="chip ${f.id===current?'on':''}" data-f="${f.id}">${f.label}<span class="n">${n}</span></button>`;
+  }).join("");
+  el.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    current=b.dataset.f;
+    try{localStorage.setItem("ploetzFilter",current)}catch(e){}
+    renderFilters(); renderMenu();
+  });
+}
+
+function card(d){
+  return `<article class="card ${d.type==='mocktail'?'mock':''} ${d.out?'out':''}">
+    ${d.out?'<div class="out-tag">ALL GONE</div>':''}
+    <div class="top">
+      <div class="emoji">${d.emoji}</div>
+      <div>
+        <div class="name">${esc(d.name)}</div>
+        <div class="meta">
+          <span class="pill str-${d.strength}">${STRENGTH[d.strength]}</span>
+          ${d.flavors.map(f=>`<span class="pill flavor">${esc(f)}</span>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="ingr">${esc(d.ingredients)}</div>
+    <p class="desc">${esc(d.desc)}</p>
+  </article>`;
+}
+
+function renderMenu(){
+  const f = FILTERS.find(x=>x.id===current) || FILTERS[0];
+  const html = SECTIONS.map(s=>{
+    // available first, sold-out drinks sink to the bottom of their section
+    const items = DRINKS.filter(d=>d.section===s.id && f.test(d)).sort((a,b)=>(a.out?1:0)-(b.out?1:0));
+    if(!items.length) return "";
+    return `<section><h2 class="sec-title">${esc(s.title)}</h2>${items.map(card).join("")}</section>`;
+  }).join("");
+  document.getElementById("menu").innerHTML = html || `<p class="empty">Nothing here yet, ask the bartender!</p>`;
+}
+
+/* snow */
+(function(){
+  const box=document.getElementById("snow"), chars=["❄","❅","❆","•"];
+  for(let i=0;i<28;i++){
+    const s=document.createElement("span");
+    s.className="flake"; s.textContent=chars[i%chars.length];
+    s.style.left=Math.random()*100+"vw";
+    s.style.fontSize=(8+Math.random()*14)+"px";
+    s.style.animationDuration=(8+Math.random()*10)+"s";
+    s.style.animationDelay=(-Math.random()*18)+"s";
+    s.style.opacity=.3+Math.random()*.6;
+    box.appendChild(s);
+  }
+})();
+
+renderFilters(); renderMenu();
+</script>
+</body>
+</html>
