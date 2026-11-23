@@ -94,6 +94,8 @@
   .mingle-btn{position:fixed;top:12px;right:12px;z-index:20;border:3px solid #fff;background:var(--gold);color:var(--red-dk);
     font:inherit;font-weight:700;font-size:.85rem;padding:8px 12px;border-radius:999px;cursor:pointer;
     box-shadow:0 4px 0 var(--red-dk),0 6px 16px rgba(0,0,0,.3);animation:wiggle 4s ease-in-out infinite}
+  .mingle-btn{display:flex;flex-direction:column;align-items:center;line-height:1.15;border-radius:18px;padding:7px 14px}
+  .mingle-btn small{font-size:.68rem;font-weight:600;color:var(--red);margin-top:2px}
   .mingle-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-dk)}
   @keyframes wiggle{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-6deg)}94%{transform:rotate(6deg)}97%{transform:rotate(-3deg)}}
   @media (prefers-reduced-motion:reduce){.mingle-btn{animation:none}}
@@ -130,7 +132,7 @@
 <body>
 <div class="snow" id="snow" aria-hidden="true"></div>
 
-<button class="mingle-btn" id="mingleBtn" aria-haspopup="dialog">💘 Single &amp; Ready to Mingle</button>
+<button class="mingle-btn" id="mingleBtn" aria-haspopup="dialog">🍸 Off-Menu Special<small>for your daughter 💘</small></button>
 
 <div class="modal-bg" id="mingle" role="dialog" aria-modal="true" aria-labelledby="mName">
   <div class="modal">
@@ -138,7 +140,7 @@
     <div class="m-head">
       <div class="m-avatar">🎖️</div>
       <div class="m-name" id="mName">Meet Ethan</div>
-      <div class="m-tag">Tonight's bartender · Eligible bachelor · Highly qualified</div>
+      <div class="m-tag">Tonight's off-menu special · Hand-selected for your daughter</div>
     </div>
     <div class="m-body">
       <div class="m-label">The Résumé</div>
@@ -164,7 +166,7 @@
       <div class="m-label">Red Flags</div>
       <div class="flags red"><span>Too funny</span><span>Too handsome</span><span>Too tall for most doorways</span><span>Makes other guys look bad</span><span>Parents will like him more than you</span></div>
 
-      <div class="m-cta">Interested? Ask the bartender for his number.
+      <div class="m-cta">Got a daughter who'd be interested? Ask the bartender for his number.
         <small>(He is the bartender.)</small></div>
       <div class="m-fine">Paid for by the Committee to Get Ethan a Date. Results not guaranteed.</div>
     </div>
